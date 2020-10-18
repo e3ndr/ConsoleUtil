@@ -9,7 +9,7 @@ public class WindowsPlatformHandler implements PlatformHandler {
 
     @Override
     public void clearConsole() throws InterruptedException, IOException {
-        new ProcessBuilder("cmd", "/c", "cls").inheritIO().start();
+        new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
     }
 
     @Override
