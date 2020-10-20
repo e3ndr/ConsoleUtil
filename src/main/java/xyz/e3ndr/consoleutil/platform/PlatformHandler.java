@@ -15,7 +15,7 @@ public interface PlatformHandler {
      * @throws IOException Signals that an I/O exception has occurred during the underlying system call.
      * @throws UnsupportedOperationException if there is no system specific implementation.
      */
-    public void clearConsole() throws IOException;
+    public void clearConsole() throws IOException, InterruptedException;
 
     /**
      * Sets the title.
@@ -24,7 +24,7 @@ public interface PlatformHandler {
      * @throws IOException Signals that an I/O exception has occurred during the underlying system call.
      * @throws UnsupportedOperationException if there is no system specific implementation.
      */
-    public void setTitle(@NonNull String title) throws IOException;
+    public void setTitle(@NonNull String title) throws IOException, InterruptedException;
 
     /**
      * Sets the size.
@@ -34,6 +34,6 @@ public interface PlatformHandler {
      * @throws IOException Signals that an I/O exception has occurred during the underlying system call.
      * @throws UnsupportedOperationException if there is no system specific implementation.
      */
-    public void setSize(int width, int height) throws IOException;
+    public void setSize(int width, int height) throws IOException, InterruptedException;
 
 }

@@ -12,7 +12,7 @@ import xyz.e3ndr.fastloggingframework.logging.LoggingUtil;
 public class ConsoleWindow {
     private Ansi ansi = Ansi.ansi();
 
-    public ConsoleWindow() throws IOException {
+    public ConsoleWindow() throws IOException, InterruptedException {
         ConsoleUtil.clearConsole();
     }
 

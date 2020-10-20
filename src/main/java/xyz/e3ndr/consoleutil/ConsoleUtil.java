@@ -28,7 +28,7 @@ public class ConsoleUtil {
      * @throws IOException Signals that an I/O exception has occurred during the underlying system call.
      * @throws UnsupportedOperationException if there is no system specific implementation.
      */
-    public static void clearConsole() throws IOException {
+    public static void clearConsole() throws IOException, InterruptedException {
         handler.clearConsole();
     }
 
@@ -38,7 +38,7 @@ public class ConsoleUtil {
      * @param title the new title
      * @throws IOException Signals that an I/O exception has occurred during the underlying system call.
      */
-    public static void setTitle(@NonNull String title) throws IOException {
+    public static void setTitle(@NonNull String title) throws IOException, InterruptedException {
         handler.setTitle(title);
     }
 
@@ -50,7 +50,7 @@ public class ConsoleUtil {
      * @throws IOException Signals that an I/O exception has occurred during the underlying system call.
      * @throws UnsupportedOperationException if there is no system specific implementation.
      */
-    public static void setSize(int width, int height) throws IOException {
+    public static void setSize(int width, int height) throws IOException, InterruptedException {
         handler.setSize(width, height);
     }
 
