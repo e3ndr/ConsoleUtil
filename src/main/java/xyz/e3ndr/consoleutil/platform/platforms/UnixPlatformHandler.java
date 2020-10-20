@@ -5,11 +5,12 @@ import java.io.IOException;
 import lombok.NonNull;
 import xyz.e3ndr.consoleutil.platform.PlatformHandler;
 
-public class UnknownPlatformHandler implements PlatformHandler {
+public class UnixPlatformHandler implements PlatformHandler {
 
     @Override
     public void clearConsole() throws IOException {
-        throw new UnsupportedOperationException();
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
     }
 
     @Override

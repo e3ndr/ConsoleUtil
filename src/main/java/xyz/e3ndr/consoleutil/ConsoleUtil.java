@@ -14,10 +14,7 @@ public class ConsoleUtil {
     private static FastLogger logger = new FastLogger();
 
     static {
-        if (platform == JavaPlatform.IDE) {
-            logger.warn("An IDE enviroment was detected, defaulting to a console size of 40,10");
-            logger.warn("If this is not an IDE enviroment make an issue report.");
-        } else if (platform == JavaPlatform.UNKNOWN) {
+        if (platform == JavaPlatform.UNKNOWN) {
             logger.warn("Could not detect system type, defaulting to a console size of 40,10");
             logger.warn("Please report the system type \"%s\" to the developers (Make an issue report).", System.getProperty("os.name"));
         }
@@ -25,18 +22,43 @@ public class ConsoleUtil {
         handler = platform.getHandler(); // Allows programs to manually set a handler.
     }
 
-    public static void clearConsole() throws InterruptedException, IOException {
+    /**
+     * Clears the console window.
+     *
+     * @throws IOException Signals that an I/O exception has occurred during the underlying system call.
+     * @throws UnsupportedOperationException if there is no system specific implementation.
+     */
+    public static void clearConsole() throws IOException {
         handler.clearConsole();
     }
 
-    public static void setTitle(@NonNull String title) throws InterruptedException, IOException {
+    /**
+     * Sets the title.
+     *
+     * @param title the new title
+     * @throws IOException Signals that an I/O exception has occurred during the underlying system call.
+     */
+    public static void setTitle(@NonNull String title) throws IOException {
         handler.setTitle(title);
     }
 
-    public static void setSize(int width, int height) throws InterruptedException, IOException {
+    /**
+     * Sets the size.
+     *
+     * @param width the width
+     * @param height the height
+     * @throws IOException Signals that an I/O exception has occurred during the underlying system call.
+     * @throws UnsupportedOperationException if there is no system specific implementation.
+     */
+    public static void setSize(int width, int height) throws IOException {
         handler.setSize(width, height);
     }
 
+    /**
+     * Sets the platform handler.
+     *
+     * @param newHandler the new handler
+     */
     @Deprecated
     public static void setHandler(@NonNull PlatformHandler newHandler) {
         handler = newHandler;
