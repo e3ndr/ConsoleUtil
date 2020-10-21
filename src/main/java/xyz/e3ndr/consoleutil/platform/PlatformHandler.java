@@ -36,4 +36,12 @@ public interface PlatformHandler {
      */
     public void setSize(int width, int height) throws IOException, InterruptedException;
 
+    /**
+     * Restarts the JVM with a console window.
+     *
+     * @throws IOException Signals that an I/O exception has occurred during the underlying system call.
+     * @throws UnsupportedOperationException if there is no system specific implementation.
+     */
+    public void summonConsole() throws IOException, InterruptedException;
+
 }
