@@ -22,8 +22,8 @@ public class UnknownPlatformHandler implements PlatformHandler {
         throw new UnsupportedOperationException();
     }
 
-	@Override
-	public void summonConsole() throws IOException, InterruptedException {
+    @Override
+    public void summonConsoleWindow() throws IOException, InterruptedException {
         throw new UnsupportedOperationException();
     }
 

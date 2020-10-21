@@ -4,8 +4,11 @@ import java.io.IOException;
 
 import lombok.NonNull;
 import xyz.e3ndr.consoleutil.platform.PlatformHandler;
+import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class UnixPlatformHandler implements PlatformHandler {
+    @SuppressWarnings("unused")
+    private FastLogger logger = new FastLogger("ConsoleUtil.UnixPlatformHandler");
 
     @Override
     public void clearConsole() throws IOException, InterruptedException {
@@ -23,9 +26,9 @@ public class UnixPlatformHandler implements PlatformHandler {
         throw new UnsupportedOperationException();
     }
 
-	@Override
-	public void summonConsole() throws IOException, InterruptedException {
+    @Override
+    public void summonConsoleWindow() throws IOException, InterruptedException {
         throw new UnsupportedOperationException();
-	}
+    }
 
 }
