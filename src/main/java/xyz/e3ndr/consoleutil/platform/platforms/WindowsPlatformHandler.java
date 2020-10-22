@@ -38,14 +38,17 @@ public class WindowsPlatformHandler implements PlatformHandler {
                 String entry = System.getProperty("sun.java.command"); // Tested, present in OpenJDK and Oracle
                 String classpath = System.getProperty("java.class.path");
                 String javaHome = System.getProperty("java.home");
+                ProcessBuilder process;
 
                 if (codeSource.isFile()) {
-                    this.run(String.format("start \"\" \"%s\\bin\\java\" -DStartedWithConsole=true %s -cp %s -jar %s", javaHome, jvmArgs, classpath, entry)).start();
+                    process = this.run(String.format("start \"\" \"%s\\bin\\java\" -DStartedWithConsole=true %s -cp %s -jar %s", javaHome, jvmArgs, classpath, entry));
                 } else {
-                    this.run(String.format("start \"\" \"%s\\bin\\java\" -DStartedWithConsole=true %s -cp %s %s", javaHome, jvmArgs, classpath, entry)).start();
+                    process = this.run(String.format("start \"\" \"%s\\bin\\java\" -DStartedWithConsole=true %s -cp %s %s", javaHome, jvmArgs, classpath, entry));
                 }
 
                 this.logger.info("Program requested restart under a console window.");
+
+                process.inheritIO().start().waitFor();
 
                 FastLoggingFramework.close(); // Flush logger
                 System.exit(0); // Orphan the child process
