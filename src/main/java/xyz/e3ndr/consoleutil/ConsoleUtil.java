@@ -67,7 +67,7 @@ public class ConsoleUtil {
      * @throws InterruptedException if there is an error while waiting for a system call.
      * @throws UnsupportedOperationException if there is no system specific implementation.
      */
-    public void summonConsoleWindow() throws IOException, InterruptedException {
+    public static void summonConsoleWindow() throws IOException, InterruptedException {
         handler.summonConsoleWindow();
     }
 

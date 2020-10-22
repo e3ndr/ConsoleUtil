@@ -2,6 +2,7 @@ package xyz.e3ndr.consoleutil.platform.platforms;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.net.URISyntaxException;
 
 import lombok.NonNull;
@@ -33,18 +34,21 @@ public class WindowsPlatformHandler implements PlatformHandler {
         try {
             if ((System.console() == null) && System.getProperty("StartedWithConsole", "false").equalsIgnoreCase("false")) {
                 File codeSource = new File(ConsoleUtil.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+                String jvmArgs = String.join(" ", ManagementFactory.getRuntimeMXBean().getInputArguments());
                 String entry = System.getProperty("sun.java.command"); // Tested, present in OpenJDK and Oracle
                 String classpath = System.getProperty("java.class.path");
                 String javaHome = System.getProperty("java.home");
 
                 if (codeSource.isFile()) {
-                    this.run(String.format("start \"\" \"%s\\bin\\java\" -DStartedWithConsole=true -cp %s -jar %s", javaHome, classpath, entry)).start();
+                    this.run(String.format("start \"\" \"%s\\bin\\java\" -DStartedWithConsole=true %s -cp %s -jar %s", javaHome, jvmArgs, classpath, entry)).start();
                 } else {
-                    this.run(String.format("start \"\" \"%s\\bin\\java\" -DStartedWithConsole=true -cp %s %s", javaHome, classpath, entry)).start();
+                    this.run(String.format("start \"\" \"%s\\bin\\java\" -DStartedWithConsole=true %s -cp %s %s", javaHome, jvmArgs, classpath, entry)).start();
                 }
 
+                this.logger.info("Program requested restart under a console window.");
+
                 FastLoggingFramework.close(); // Flush logger
-                System.exit(0); // Orphan the cmd process
+                System.exit(0); // Orphan the child process
             }
         } catch (URISyntaxException e) {
             throw new IOException(e);
