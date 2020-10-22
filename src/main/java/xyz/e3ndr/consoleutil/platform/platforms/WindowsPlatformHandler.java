@@ -41,9 +41,9 @@ public class WindowsPlatformHandler implements PlatformHandler {
                 ProcessBuilder process;
 
                 if (codeSource.isFile()) {
-                    process = this.run(String.format("start \"\" \"%s\\bin\\java\" -DStartedWithConsole=true %s -cp %s -jar %s", javaHome, jvmArgs, classpath, entry));
+                    process = this.run(String.format("\"%s\\bin\\java\" -DStartedWithConsole=true %s -cp %s -jar %s", javaHome, jvmArgs, classpath, entry));
                 } else {
-                    process = this.run(String.format("start \"\" \"%s\\bin\\java\" -DStartedWithConsole=true %s -cp %s %s", javaHome, jvmArgs, classpath, entry));
+                    process = this.run(String.format("\"%s\\bin\\java\" -DStartedWithConsole=true %s -cp %s %s", javaHome, jvmArgs, classpath, entry));
                 }
 
                 this.logger.info("Program requested restart under a console window.");
