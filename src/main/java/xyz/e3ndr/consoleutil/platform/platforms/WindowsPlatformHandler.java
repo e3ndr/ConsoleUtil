@@ -44,7 +44,7 @@ public class WindowsPlatformHandler implements PlatformHandler {
 
             this.logger.info("Program requested restart under a console window.");
 
-            process.inheritIO().start().waitFor();
+            process.inheritIO().start();
 
             FastLoggingFramework.close(); // Flush logger
             System.exit(0); // Orphan the child process
