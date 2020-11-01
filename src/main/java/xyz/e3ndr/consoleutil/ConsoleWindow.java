@@ -30,6 +30,28 @@ public class ConsoleWindow {
     }
 
     /**
+     * Saves the cursor position.
+     *
+     * @return this instance, for chaining
+     */
+    public ConsoleWindow saveCursor() {
+        this.ansi.saveCursorPosition();
+
+        return this;
+    }
+
+    /**
+     * Restores the saved cursor position.
+     *
+     * @return this instance, for chaining
+     */
+    public ConsoleWindow restoreCursor() {
+        this.ansi.restoreCursorPosition();
+
+        return this;
+    }
+
+    /**
      * Writes text. This has a built in String.format implementation.
      *
      * @param format the format
