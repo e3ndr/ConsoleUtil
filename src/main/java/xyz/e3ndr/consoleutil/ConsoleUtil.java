@@ -1,7 +1,10 @@
 package xyz.e3ndr.consoleutil;
 
+import java.awt.Dimension;
 import java.io.IOException;
 
+import jline.Terminal;
+import jline.TerminalFactory;
 import lombok.Getter;
 import lombok.NonNull;
 import xyz.e3ndr.consoleutil.platform.JavaPlatform;
@@ -10,6 +13,7 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class ConsoleUtil {
     private static @Getter final JavaPlatform platform = JavaPlatform.get();
+    private static @Getter Terminal jLine = TerminalFactory.get();
     private static @Getter @NonNull PlatformHandler handler;
     private static FastLogger logger = new FastLogger();
 
@@ -21,6 +25,13 @@ public class ConsoleUtil {
 
         handler = platform.getHandler(); // Allows programs to manually set a handler.
 
+        try {
+            jLine.init();
+            jLine.setEchoEnabled(false);
+        } catch (Exception e) {
+            logger.severe("Unable to initialize JLine: %s", e);
+        }
+
         logger.debug("Running under %s on %s", System.getProperty("java.vm.name", "Unknown Runtime"), System.getProperty("os.name", "Unknown Operating System"));
     }
 
@@ -29,6 +40,10 @@ public class ConsoleUtil {
      */
     public static void bell() {
         System.out.print((char) 7);
+    }
+
+    public static Dimension getSize() {
+        return new Dimension(jLine.getWidth(), jLine.getHeight());
     }
 
     /**

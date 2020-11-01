@@ -5,10 +5,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import jline.Terminal;
-import jline.TerminalFactory;
 import jline.internal.NonBlockingInputStream;
 import lombok.NonNull;
+import xyz.e3ndr.consoleutil.ConsoleUtil;
 
 public class KeyHook {
     private static final int ANSI_ESCAPE = 27;
@@ -21,12 +20,7 @@ public class KeyHook {
 
     static {
         try {
-            Terminal terminal = TerminalFactory.get();
-
-            terminal.init();
-            terminal.setEchoEnabled(false);
-
-            in = new NonBlockingInputStream(terminal.wrapInIfNeeded(System.in), true);
+            in = new NonBlockingInputStream(ConsoleUtil.getJLine().wrapInIfNeeded(System.in), true);
 
             Thread t = new Thread() {
                 @Override
