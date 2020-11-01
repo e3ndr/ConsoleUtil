@@ -55,6 +55,14 @@ public class KeyHook {
         int read = in.read();
 
         if (read != -1) {
+            for (InputKey key : InputKey.values()) {
+                if (key.isRegular() && (key.getCode() == read)) {
+                    broadcast(key);
+
+                    return;
+                }
+            }
+
             if (read == ANSI_ESCAPE) {
                 int next = in.peek(PEEK);
 
