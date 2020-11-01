@@ -25,6 +25,13 @@ public class ConsoleUtil {
     }
 
     /**
+     * Rings the bell.
+     */
+    public static void bell() {
+        System.out.print((char) 7);
+    }
+
+    /**
      * Clears the console window.
      *
      * @throws IOException Signals that an I/O exception has occurred during the underlying system call.
