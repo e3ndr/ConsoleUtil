@@ -32,10 +32,18 @@ public class UnixPlatformHandler implements PlatformHandler {
     public void summonConsoleWindow(String line) throws IOException, InterruptedException {
         this.logger.info("Program requested restart under a console window.");
 
-        new ProcessBuilder("x-terminal-emulator", "-e", '"' + line + '"').start();
+        if (isGnome()) { // GNOME is special, so we have to specify that we want a window.
+            new ProcessBuilder("gnome-terminal", "--window", "--command='" + line + "'").start();
+        } else { // Try a generic command
+            new ProcessBuilder("x-terminal-emulator", "-e", line).start();
+        }
 
         FastLoggingFramework.close(); // Flush logger
         System.exit(0); // Orphan the child process
+    }
+
+    public static boolean isGnome() {
+        return System.getenv("GNOME_DESKTOP_SESSION_ID") != null;
     }
 
 }

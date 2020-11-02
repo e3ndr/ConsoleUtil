@@ -1,6 +1,7 @@
 package xyz.e3ndr.consoleutil;
 
 import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -41,7 +42,7 @@ public class ConsoleUtil {
      * Rings the bell.
      */
     public static void bell() {
-        System.out.print((char) 7);
+        Toolkit.getDefaultToolkit().beep();
     }
 
     public static Dimension getSize() {
@@ -108,7 +109,7 @@ public class ConsoleUtil {
      *                                       implementation.
      */
     public static void summonConsoleWindow() throws IOException, InterruptedException {
-        if (/* (System.console() == null) || */System.getProperty("StartedWithConsole", "false").equalsIgnoreCase("false")) {
+        if (/* (System.console() == null) && */System.getProperty("StartedWithConsole", "false").equalsIgnoreCase("false")) {
             String jvmArgs = String.join(" ", ManagementFactory.getRuntimeMXBean().getInputArguments());
             String entry = System.getProperty("sun.java.command"); // Tested, present in OpenJDK and Oracle
             String classpath = System.getProperty("java.class.path");
