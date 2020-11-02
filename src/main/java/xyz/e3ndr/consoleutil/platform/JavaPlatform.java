@@ -19,7 +19,7 @@ public enum JavaPlatform {
 
         if (name.contains("windows")) {
             return WINDOWS;
-        } else if (name.contains("linux") || name.contains("mac")) {
+        } else if (name.contains("mac") || name.contains("linux")) {
             return UNIX;
         } else {
             return UNKNOWN;

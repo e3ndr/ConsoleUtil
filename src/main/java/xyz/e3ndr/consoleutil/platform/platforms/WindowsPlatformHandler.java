@@ -1,8 +1,6 @@
 package xyz.e3ndr.consoleutil.platform.platforms;
 
-import java.io.File;
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
 
 import lombok.NonNull;
 import xyz.e3ndr.consoleutil.platform.PlatformHandler;
@@ -19,36 +17,22 @@ public class WindowsPlatformHandler implements PlatformHandler {
 
     @Override
     public void setTitle(@NonNull String title) throws IOException, InterruptedException {
-        this.run("title " + title).inheritIO().start().waitFor();
+        this.run("title " + title).inheritIO().start();
     }
 
     @Override
     public void setSize(int width, int height) throws IOException, InterruptedException {
-        this.run("mode con: cols=" + width + " lines=" + height).inheritIO().start();
+        this.run("mode con: cols=" + width + " lines=" + height).inheritIO().start().waitFor();
     }
 
     @Override
-    public void summonConsoleWindow() throws IOException, InterruptedException {
-        if ((System.console() == null) && System.getProperty("StartedWithConsole", "false").equalsIgnoreCase("false")) {
-            String jvmArgs = String.join(" ", ManagementFactory.getRuntimeMXBean().getInputArguments());
-            String entry = System.getProperty("sun.java.command"); // Tested, present in OpenJDK and Oracle
-            String classpath = System.getProperty("java.class.path");
-            String javaHome = System.getProperty("java.home");
-            ProcessBuilder process;
+    public void summonConsoleWindow(String line) throws IOException, InterruptedException {
+        this.logger.info("Program requested restart under a console window.");
 
-            if (new File(entry).exists()) { // If the entry is a file, not a main method.
-                process = this.run(String.format("start \"\" \"%s\\bin\\java\" -DStartedWithConsole=true %s -cp %s -jar %s", javaHome, jvmArgs, classpath, entry));
-            } else {
-                process = this.run(String.format("start \"\" \"%s\\bin\\java\" -DStartedWithConsole=true %s -cp %s %s", javaHome, jvmArgs, classpath, entry));
-            }
+        this.run(String.format("start \"\" %s", line)).start();
 
-            this.logger.info("Program requested restart under a console window.");
-
-            process.inheritIO().start();
-
-            FastLoggingFramework.close(); // Flush logger
-            System.exit(0); // Orphan the child process
-        }
+        FastLoggingFramework.close(); // Flush logger
+        System.exit(0); // Orphan the child process
     }
 
     private ProcessBuilder run(String command) {

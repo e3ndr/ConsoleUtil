@@ -41,11 +41,12 @@ public interface PlatformHandler {
 
     /**
      * Restarts the JVM with a console window.
+     * @param line 
      *
      * @throws IOException Signals that an I/O exception has occurred during the underlying system call.
      * @throws InterruptedException if there is an error while waiting for a system call.
      * @throws UnsupportedOperationException if there is no system specific implementation.
      */
-    public void summonConsoleWindow() throws IOException, InterruptedException;
+    public void summonConsoleWindow(String line) throws IOException, InterruptedException;
 
 }

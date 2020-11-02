@@ -1,7 +1,9 @@
 package xyz.e3ndr.consoleutil;
 
 import java.awt.Dimension;
+import java.io.File;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 
 import jline.Terminal;
 import jline.TerminalFactory;
@@ -49,9 +51,13 @@ public class ConsoleUtil {
     /**
      * Clears the console window.
      *
-     * @throws IOException Signals that an I/O exception has occurred during the underlying system call.
-     * @throws InterruptedException if there is an error while waiting for a system call.
-     * @throws UnsupportedOperationException if there is no system specific implementation.
+     * @throws IOException                   Signals that an I/O exception has
+     *                                       occurred during the underlying system
+     *                                       call.
+     * @throws InterruptedException          if there is an error while waiting for
+     *                                       a system call.
+     * @throws UnsupportedOperationException if there is no system specific
+     *                                       implementation.
      */
     public static void clearConsole() throws IOException, InterruptedException {
         handler.clearConsole();
@@ -61,9 +67,13 @@ public class ConsoleUtil {
      * Sets the title.
      *
      * @param title the new title
-     * @throws IOException Signals that an I/O exception has occurred during the underlying system call.
-     * @throws InterruptedException if there is an error while waiting for a system call.
-     * @throws UnsupportedOperationException if there is no system specific implementation.
+     * @throws IOException                   Signals that an I/O exception has
+     *                                       occurred during the underlying system
+     *                                       call.
+     * @throws InterruptedException          if there is an error while waiting for
+     *                                       a system call.
+     * @throws UnsupportedOperationException if there is no system specific
+     *                                       implementation.
      */
     public static void setTitle(@NonNull String title) throws IOException, InterruptedException {
         handler.setTitle(title);
@@ -72,11 +82,15 @@ public class ConsoleUtil {
     /**
      * Sets the size.
      *
-     * @param width the width
+     * @param width  the width
      * @param height the height
-     * @throws IOException Signals that an I/O exception has occurred during the underlying system call.
-     * @throws InterruptedException if there is an error while waiting for a system call.
-     * @throws UnsupportedOperationException if there is no system specific implementation.
+     * @throws IOException                   Signals that an I/O exception has
+     *                                       occurred during the underlying system
+     *                                       call.
+     * @throws InterruptedException          if there is an error while waiting for
+     *                                       a system call.
+     * @throws UnsupportedOperationException if there is no system specific
+     *                                       implementation.
      */
     public static void setSize(int width, int height) throws IOException, InterruptedException {
         handler.setSize(width, height);
@@ -85,12 +99,27 @@ public class ConsoleUtil {
     /**
      * Restarts the JVM with a console window.
      *
-     * @throws IOException Signals that an I/O exception has occurred during the underlying system call.
-     * @throws InterruptedException if there is an error while waiting for a system call.
-     * @throws UnsupportedOperationException if there is no system specific implementation.
+     * @throws IOException                   Signals that an I/O exception has
+     *                                       occurred during the underlying system
+     *                                       call.
+     * @throws InterruptedException          if there is an error while waiting for
+     *                                       a system call.
+     * @throws UnsupportedOperationException if there is no system specific
+     *                                       implementation.
      */
     public static void summonConsoleWindow() throws IOException, InterruptedException {
-        handler.summonConsoleWindow();
+        if (/* (System.console() == null) || */System.getProperty("StartedWithConsole", "false").equalsIgnoreCase("false")) {
+            String jvmArgs = String.join(" ", ManagementFactory.getRuntimeMXBean().getInputArguments());
+            String entry = System.getProperty("sun.java.command"); // Tested, present in OpenJDK and Oracle
+            String classpath = System.getProperty("java.class.path");
+            String javaHome = System.getProperty("java.home");
+
+            if (new File(entry).exists()) { // If the entry is a file, not a main method.
+                handler.summonConsoleWindow(String.format("\"%s\\bin\\java\" -DStartedWithConsole=true %s -cp %s -jar %s", javaHome, jvmArgs, classpath, entry));
+            } else {
+                handler.summonConsoleWindow(String.format("\"%s\\bin\\java\" -DStartedWithConsole=true %s -cp %s %s", javaHome, jvmArgs, classpath, entry));
+            }
+        }
     }
 
     /**
