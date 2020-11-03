@@ -72,7 +72,7 @@ public class ConsoleUtil {
     /**
      * Sets the title.
      *
-     * @param  title                         the new title
+     * @param title the new title
      * 
      * @throws IOException                   Signals that an I/O exception has
      *                                       occurred during the underlying system
@@ -89,8 +89,8 @@ public class ConsoleUtil {
     /**
      * Sets the size.
      *
-     * @param  width                         the width
-     * @param  height                        the height
+     * @param width  the width
+     * @param height the height
      * 
      * @throws IOException                   Signals that an I/O exception has
      *                                       occurred during the underlying system
@@ -116,14 +116,21 @@ public class ConsoleUtil {
      *                                       implementation.
      */
     public static void summonConsoleWindow() throws IOException, InterruptedException {
-        if (/* (System.console() == null) && */ System.getProperty("StartedWithConsole", "false").equalsIgnoreCase("false")) {
+        String status = System.getProperty("StartedWithConsole", "false");
+
+        if (((System.console() == null) && status.equalsIgnoreCase("false")) || status.equalsIgnoreCase("force")) {
             String jvmArgs = String.join(" ", ManagementFactory.getRuntimeMXBean().getInputArguments());
             String entry = System.getProperty("sun.java.command"); // Tested, present in OpenJDK and Oracle
             String classpath = System.getProperty("java.class.path");
             String javaHome = System.getProperty("java.home");
 
-            if (new File(entry).exists()) { // If the entry is a file, not a main method.
-                handler.summonConsoleWindow(String.format("\"%s/bin/java\" -DStartedWithConsole=true %s -cp \"%s\" -jar %s", javaHome, jvmArgs, classpath, entry));
+            String[] args = entry.split(" ");
+            File entryFile = new File(args[0]);
+
+            if (entryFile.exists()) { // If the entry is a file, not a main method.
+                args[0] = '"' + entryFile.getCanonicalPath() + '"'; // Use raw file path.
+
+                handler.summonConsoleWindow(String.format("\"%s/bin/java\" -DStartedWithConsole=true %s -cp \"%s\" -jar %s", javaHome, jvmArgs, classpath, String.join(" ", args)));
             } else {
                 handler.summonConsoleWindow(String.format("\"%s/bin/java\" -DStartedWithConsole=true %s -cp \"%s\" %s", javaHome, jvmArgs, classpath, entry));
             }
