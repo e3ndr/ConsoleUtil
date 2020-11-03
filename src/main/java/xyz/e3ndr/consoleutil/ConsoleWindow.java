@@ -19,9 +19,10 @@ public class ConsoleWindow {
     /**
      * Cursors to a specific point in the console window.
      *
-     * @param x the x
-     * @param y the y
-     * @return this instance, for chaining
+     * @param  x the x position
+     * @param  y the y position
+     * 
+     * @return   this instance, for chaining
      */
     public ConsoleWindow cursorTo(int x, int y) {
         this.ansi.cursor(y + 1, x + 1);
@@ -54,9 +55,10 @@ public class ConsoleWindow {
     /**
      * Writes text. This has a built in String.format implementation.
      *
-     * @param format the format
-     * @param args the args
-     * @return this instance, for chaining
+     * @param  format the format
+     * @param  args   the args
+     * 
+     * @return        this instance, for chaining
      */
     public ConsoleWindow write(@Nullable Object format, @Nullable Object... args) {
         String line = LoggingUtil.parseFormat(format, args);
@@ -67,13 +69,35 @@ public class ConsoleWindow {
     }
 
     /**
+     * Writes text. This has a built in String.format implementation.
+     *
+     * @param  x      the x position
+     * @param  y      the y position
+     * @param  format the format
+     * @param  args   the args
+     * 
+     * @return        this instance, for chaining
+     */
+    public ConsoleWindow write(int x, int y, @Nullable Object format, @Nullable Object... args) {
+        String line = LoggingUtil.parseFormat(format, args);
+
+        this.ansi.saveCursorPosition();
+        this.cursorTo(x, y);
+        this.ansi.a(line);
+        this.ansi.restoreCursorPosition();
+
+        return this;
+    }
+
+    /**
      * Prints a loading bar.
      *
-     * @param style the style to use, see {@link BarStyle}
-     * @param progress the progress, between 0-1
-     * @param size the size of the bar
-     * @param showPercent whether or not to show a percentage
-     * @return this instance, for chaining
+     * @param  style       the style to use, see {@link BarStyle}
+     * @param  progress    the progress, between 0-1
+     * @param  size        the size of the bar
+     * @param  showPercent whether or not to show a percentage
+     * 
+     * @return             this instance, for chaining
      */
     public ConsoleWindow loadingBar(@NonNull BarStyle style, double progress, int size, boolean showPercent) {
         this.write(style.format(progress, size, showPercent));
@@ -84,13 +108,14 @@ public class ConsoleWindow {
     /**
      * Prints a loading bar.
      *
-     * @param x the x
-     * @param y the y
-     * @param style the style to use, see {@link BarStyle}
-     * @param progress the progress, between 0-1
-     * @param size the size of the bar
-     * @param showPercent whether or not to show a percentage
-     * @return this instance, for chaining
+     * @param  x           the x position
+     * @param  y           the y position
+     * @param  style       the style to use, see {@link BarStyle}
+     * @param  progress    the progress, between 0-1
+     * @param  size        the size of the bar
+     * @param  showPercent whether or not to show a percentage
+     * 
+     * @return             this instance, for chaining
      */
     public ConsoleWindow loadingBar(int x, int y, @NonNull BarStyle style, double progress, int size, boolean showPercent) {
         this.ansi.saveCursorPosition();
@@ -104,9 +129,10 @@ public class ConsoleWindow {
     /**
      * Replaces a line with specified format.
      *
-     * @param format the format
-     * @param args the args
-     * @return this instance, for chaining
+     * @param  format the format
+     * @param  args   the args
+     * 
+     * @return        this instance, for chaining
      */
     public ConsoleWindow replaceLine(@Nullable Object format, @Nullable Object... args) {
         String line = LoggingUtil.parseFormat(format, args);
@@ -118,10 +144,32 @@ public class ConsoleWindow {
     }
 
     /**
+     * Replaces a line with specified format.
+     *
+     * @param  y      the y position
+     * @param  format the format
+     * @param  args   the args
+     * 
+     * @return        this instance, for chaining
+     */
+    public ConsoleWindow replaceLine(int y, @Nullable Object format, @Nullable Object... args) {
+        String line = LoggingUtil.parseFormat(format, args);
+
+        this.ansi.saveCursorPosition();
+        this.cursorTo(0, y);
+        this.ansi.eraseLine(Erase.ALL);
+        this.ansi.a(line);
+        this.ansi.restoreCursorPosition();
+
+        return this;
+    }
+
+    /**
      * Sets the text color.
      *
-     * @param color the color
-     * @return this instance, for chaining
+     * @param  color the color
+     * 
+     * @return       this instance, for chaining
      */
     public ConsoleWindow setTextColor(@NonNull ConsoleColor color) {
         if (color.isLight()) {
@@ -136,8 +184,9 @@ public class ConsoleWindow {
     /**
      * Sets the background color.
      *
-     * @param color the color
-     * @return this instance, for chaining
+     * @param  color the color
+     * 
+     * @return       this instance, for chaining
      */
     public ConsoleWindow setBackgroundColor(@NonNull ConsoleColor color) {
         if (color.isLight()) {
@@ -161,10 +210,11 @@ public class ConsoleWindow {
     }
 
     /**
-     * Clears the line denoted by the y parameter.
+     * Clears the line denoted by the y position parameter.
      *
-     * @param y the y
-     * @return this instance, for chaining
+     * @param  y the y position
+     * 
+     * @return   this instance, for chaining
      */
     public ConsoleWindow clearLine(int y) {
         this.ansi.saveCursorPosition();
@@ -178,8 +228,9 @@ public class ConsoleWindow {
     /**
      * Sets the attributes.
      *
-     * @param attributes the attributes
-     * @return this instance, for chaining
+     * @param  attributes the attributes
+     * 
+     * @return            this instance, for chaining
      */
     public ConsoleWindow setAttributes(@NonNull ConsoleAttribute... attributes) {
         for (ConsoleAttribute attribute : attributes) {

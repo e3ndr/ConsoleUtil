@@ -4,10 +4,10 @@ import java.io.IOException;
 
 import lombok.NonNull;
 import xyz.e3ndr.consoleutil.platform.PlatformHandler;
-import xyz.e3ndr.fastloggingframework.FastLoggingFramework;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class UnixPlatformHandler implements PlatformHandler {
+    @SuppressWarnings("unused")
     private FastLogger logger = new FastLogger("ConsoleUtil.UnixPlatformHandler");
 
     @Override
@@ -30,16 +30,25 @@ public class UnixPlatformHandler implements PlatformHandler {
 
     @Override
     public void summonConsoleWindow(String line) throws IOException, InterruptedException {
-        this.logger.info("Program requested restart under a console window.");
+        // TODO Doesn't exactly work, as it usually cannot access the directory.
+        // (Unless you give it sudo)
 
-        if (isGnome()) { // GNOME is special, so we have to specify that we want a window.
-            new ProcessBuilder("gnome-terminal", "--window", "--command='" + line + "'").start();
-        } else { // Try a generic command
-            new ProcessBuilder("x-terminal-emulator", "-e", line).start();
-        }
-
-        FastLoggingFramework.close(); // Flush logger
-        System.exit(0); // Orphan the child process
+        /*
+         * this.logger.info("Program requested restart under a console window.");
+         *
+         * File local = new File("./");
+         * 
+         * if (isGnome()) { // GNOME is special, so we have to specify that we want a
+         * new window. new ProcessBuilder("gnome-terminal", "--window",
+         * "--working-directory='" + local.getCanonicalPath() + "/'",
+         * String.format("--command='%s'", local.getCanonicalPath(), line)).start(); }
+         * else { // Try a generic command new ProcessBuilder("x-terminal-emulator",
+         * "--working-directory='" + local.getCanonicalPath() + "/'", "-e",
+         * line).start(); }
+         * 
+         * FastLoggingFramework.close(); // Flush logger System.exit(0); // Orphan the
+         * child process
+         */
     }
 
     public static boolean isGnome() {

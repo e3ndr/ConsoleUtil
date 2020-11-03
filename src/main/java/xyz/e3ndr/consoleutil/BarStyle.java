@@ -4,7 +4,7 @@ public class BarStyle {
 
     /**
      * A default style that looks like this: <br>
-     * {@code [■■■&nbsp;]}
+     * {@code [■■■ ]}
      */
     public static final BarStyle SQUARE = new BarStyle('[', ']', ' ', '\u25A0');
 
@@ -34,10 +34,10 @@ public class BarStyle {
     /**
      * Instantiates a new bar style.
      *
-     * @param opening the opening
-     * @param closing the closing
-     * @param empty the empty
-     * @param full the full
+     * @param opening the opening char
+     * @param closing the closing char
+     * @param empty   the char to use in empty spots
+     * @param full    the chat to use in filled spots
      */
     public BarStyle(char opening, char closing, char empty, char full) {
         this.opening = opening;
@@ -50,7 +50,7 @@ public class BarStyle {
      * Instantiates a new bar style.
      *
      * @param empty the empty
-     * @param full the full
+     * @param full  the full
      */
     public BarStyle(char empty, char full) {
         this(' ', ' ', empty, full);
@@ -59,10 +59,11 @@ public class BarStyle {
     /**
      * Format.
      *
-     * @param progress the progress, between 0-1
-     * @param size the size of the bar
-     * @param showPercent whether or not to show a percentage
-     * @return the string
+     * @param  progress    the progress, between 0-1
+     * @param  size        the size of the bar
+     * @param  showPercent whether or not to show a percentage
+     * 
+     * @return             the string
      */
     public String format(double progress, int size, boolean showPercent) {
         StringBuilder sb = new StringBuilder();

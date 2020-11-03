@@ -45,6 +45,11 @@ public class ConsoleUtil {
         Toolkit.getDefaultToolkit().beep();
     }
 
+    /**
+     * Gets the size of the console window.
+     *
+     * @return the dimensions
+     */
     public static Dimension getSize() {
         return new Dimension(jLine.getWidth(), jLine.getHeight());
     }
@@ -67,7 +72,8 @@ public class ConsoleUtil {
     /**
      * Sets the title.
      *
-     * @param title the new title
+     * @param  title                         the new title
+     * 
      * @throws IOException                   Signals that an I/O exception has
      *                                       occurred during the underlying system
      *                                       call.
@@ -83,8 +89,9 @@ public class ConsoleUtil {
     /**
      * Sets the size.
      *
-     * @param width  the width
-     * @param height the height
+     * @param  width                         the width
+     * @param  height                        the height
+     * 
      * @throws IOException                   Signals that an I/O exception has
      *                                       occurred during the underlying system
      *                                       call.
@@ -109,16 +116,16 @@ public class ConsoleUtil {
      *                                       implementation.
      */
     public static void summonConsoleWindow() throws IOException, InterruptedException {
-        if (/* (System.console() == null) && */System.getProperty("StartedWithConsole", "false").equalsIgnoreCase("false")) {
+        if (/* (System.console() == null) && */ System.getProperty("StartedWithConsole", "false").equalsIgnoreCase("false")) {
             String jvmArgs = String.join(" ", ManagementFactory.getRuntimeMXBean().getInputArguments());
             String entry = System.getProperty("sun.java.command"); // Tested, present in OpenJDK and Oracle
             String classpath = System.getProperty("java.class.path");
             String javaHome = System.getProperty("java.home");
 
             if (new File(entry).exists()) { // If the entry is a file, not a main method.
-                handler.summonConsoleWindow(String.format("\"%s\\bin\\java\" -DStartedWithConsole=true %s -cp %s -jar %s", javaHome, jvmArgs, classpath, entry));
+                handler.summonConsoleWindow(String.format("\"%s/bin/java\" -DStartedWithConsole=true %s -cp \"%s\" -jar %s", javaHome, jvmArgs, classpath, entry));
             } else {
-                handler.summonConsoleWindow(String.format("\"%s\\bin\\java\" -DStartedWithConsole=true %s -cp %s %s", javaHome, jvmArgs, classpath, entry));
+                handler.summonConsoleWindow(String.format("\"%s/bin/java\" -DStartedWithConsole=true %s -cp \"%s\" %s", javaHome, jvmArgs, classpath, entry));
             }
         }
     }
