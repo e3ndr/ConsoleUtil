@@ -72,7 +72,7 @@ public class ConsoleUtil {
     /**
      * Sets the title.
      *
-     * @param title the new title
+     * @param  title                         the new title
      * 
      * @throws IOException                   Signals that an I/O exception has
      *                                       occurred during the underlying system
@@ -89,8 +89,8 @@ public class ConsoleUtil {
     /**
      * Sets the size.
      *
-     * @param width  the width
-     * @param height the height
+     * @param  width                         the width
+     * @param  height                        the height
      * 
      * @throws IOException                   Signals that an I/O exception has
      *                                       occurred during the underlying system
