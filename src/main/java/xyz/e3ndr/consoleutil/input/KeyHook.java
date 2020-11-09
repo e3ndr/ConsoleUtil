@@ -6,17 +6,22 @@ import java.util.Iterator;
 import java.util.Set;
 
 import jline.internal.NonBlockingInputStream;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import xyz.e3ndr.consoleutil.ConsoleUtil;
 
 public class KeyHook {
-    private static final int ANSI_ESCAPE = 27;
+    private static final int CTRL_MASK = 0b11100000;
+    private static final int ANSI_ESCAPE = 27; // Also ALT
     private static final int ANSI_START = 91;
     private static final int PHANTOM = 126;
-    private static final long PEEK = 15;
 
-    private static NonBlockingInputStream in;
+    private static final long PEEK_TIME = 15;
+
+    private static @Getter @Setter boolean ignoringInterrupt = true;
     private static Set<KeyListener> listeners = new HashSet<>();
+    private static NonBlockingInputStream in;
 
     static {
         try {
@@ -27,7 +32,19 @@ public class KeyHook {
                 public void run() {
                     try {
                         while (true) {
+                            // Ensures that another thread doesn't change ignoringInterrupt
+                            // before we can re-enable it below.
+                            boolean ignoreInterrupt = ignoringInterrupt;
+
+                            if (ignoreInterrupt) {
+                                ConsoleUtil.getJLine().disableInterruptCharacter();
+                            }
+
                             read();
+
+                            if (ignoreInterrupt) {
+                                ConsoleUtil.getJLine().enableInterruptCharacter();
+                            }
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -55,16 +72,8 @@ public class KeyHook {
         int read = in.read();
 
         if (read != -1) {
-            for (InputKey key : InputKey.values()) {
-                if (key.isRegular() && (key.getCode() == read)) {
-                    broadcast(key);
-
-                    return;
-                }
-            }
-
             if (read == ANSI_ESCAPE) {
-                int next = in.peek(PEEK);
+                int next = in.peek(PEEK_TIME);
 
                 if (next == -2) {
                     broadcast(InputKey.ESCAPE);
@@ -75,36 +84,51 @@ public class KeyHook {
 
                     for (InputKey key : InputKey.values()) {
                         if (key.getCode() == code) {
-                            if (!key.isPhantom() || (in.peek(PEEK) == PHANTOM)) {
+                            if (!key.isPhantom() || (in.peek(PEEK_TIME) == PHANTOM)) {
                                 if (key.isPhantom()) {
                                     in.read(); // Clear the phantom.
                                 }
 
                                 broadcast(key);
+
                                 return;
                             }
                         }
                     }
+                } else { // It's a normal sequence, e.g ALT+A
+                    in.read(); // Clear the start.
 
-                    // Not a valid code, send the keys to the listeners instead.
-                    broadcast(InputKey.ALT);
-                    broadcast(ANSI_START);
-                } else {
-                    broadcast(InputKey.ALT);
+                    if ((next & CTRL_MASK) == 0) {
+                        broadcast(next + 96, true, true);
+                    } else {
+                        broadcast(next, true, false);
+                    }
                 }
             } else {
-                broadcast(read);
+                for (InputKey key : InputKey.values()) {
+                    if (key.isRegular() && (key.getCode() == read)) {
+                        broadcast(key);
+
+                        return;
+                    }
+                }
+
+                if ((read & CTRL_MASK) == 0) {
+                    broadcast(read + 96, false, true);
+                } else {
+                    broadcast(read, false, false);
+                }
             }
         } else {
             throw new IOException("End of stream has been reached.");
         }
     }
 
-    private static void broadcast(int key) {
+    private static void broadcast(int key, boolean alt, boolean control) {
         Iterator<KeyListener> it = listeners.iterator();
 
         while (it.hasNext()) {
-            it.next().onKey(key);
+            it.next().onKey((char) key, alt, control);
         }
     }
 

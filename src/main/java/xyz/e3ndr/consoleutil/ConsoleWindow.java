@@ -14,6 +14,8 @@ public class ConsoleWindow {
 
     public ConsoleWindow() throws IOException, InterruptedException {
         ConsoleUtil.clearConsole();
+
+        ConsoleUtil.getJLine().setEchoEnabled(false);
     }
 
     /**
@@ -69,7 +71,8 @@ public class ConsoleWindow {
     }
 
     /**
-     * Writes text. This has a built in String.format implementation.
+     * Writes text at a specified location. This has a built in String.format
+     * implementation.
      *
      * @param  x      the x position
      * @param  y      the y position
@@ -78,7 +81,7 @@ public class ConsoleWindow {
      * 
      * @return        this instance, for chaining
      */
-    public ConsoleWindow write(int x, int y, @Nullable Object format, @Nullable Object... args) {
+    public ConsoleWindow writeAt(int x, int y, @Nullable Object format, @Nullable Object... args) {
         String line = LoggingUtil.parseFormat(format, args);
 
         this.ansi.saveCursorPosition();
@@ -144,7 +147,7 @@ public class ConsoleWindow {
     }
 
     /**
-     * Replaces a line with specified format.
+     * Replaces a specified line with specified format.
      *
      * @param  y      the y position
      * @param  format the format
@@ -152,7 +155,7 @@ public class ConsoleWindow {
      * 
      * @return        this instance, for chaining
      */
-    public ConsoleWindow replaceLine(int y, @Nullable Object format, @Nullable Object... args) {
+    public ConsoleWindow replaceLineAy(int y, @Nullable Object format, @Nullable Object... args) {
         String line = LoggingUtil.parseFormat(format, args);
 
         this.ansi.saveCursorPosition();

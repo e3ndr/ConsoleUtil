@@ -30,7 +30,6 @@ public class ConsoleUtil {
 
         try {
             jLine.init();
-            jLine.setEchoEnabled(false);
         } catch (Exception e) {
             logger.severe("Unable to initialize JLine: %s", e);
         }
