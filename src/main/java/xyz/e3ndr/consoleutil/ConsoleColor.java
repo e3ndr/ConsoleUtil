@@ -18,20 +18,25 @@ public enum ConsoleColor {
     LIGHT_BLUE(true, Ansi.Color.BLUE),
     MAGENTA(false, Ansi.Color.MAGENTA),
     LIGHT_MAGENTA(true, Ansi.Color.MAGENTA),
-    WHITE(false, Ansi.Color.WHITE),
-    GREY(false, Ansi.Color.DEFAULT),
-    GRAY(false, Ansi.Color.DEFAULT),
-    DEFAULT(false, Ansi.Color.DEFAULT),
-    DARK_GREY(true, Ansi.Color.BLACK),
+    WHITE(true, Ansi.Color.WHITE),
+    GRAY(false, Ansi.Color.WHITE),
     DARK_GRAY(true, Ansi.Color.BLACK),
     BLACK(false, Ansi.Color.BLACK);
 
-    private Ansi.Color ansiColor;
-    private boolean isLight;
+    private String background;
+    private String foreground;
+    private boolean light;
 
     private ConsoleColor(boolean isLight, Ansi.Color ansiColor) {
-        this.ansiColor = ansiColor;
-        this.isLight = isLight;
+        this.light = isLight;
+
+        if (isLight) {
+            this.background = new Ansi().bgBright(ansiColor).toString();
+            this.foreground = new Ansi().fgBright(ansiColor).toString();
+        } else {
+            this.background = new Ansi().bg(ansiColor).toString();
+            this.foreground = new Ansi().fg(ansiColor).toString();
+        }
     }
 
 }
