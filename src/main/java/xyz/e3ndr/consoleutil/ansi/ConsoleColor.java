@@ -1,4 +1,4 @@
-package xyz.e3ndr.consoleutil;
+package xyz.e3ndr.consoleutil.ansi;
 
 import org.fusesource.jansi.Ansi;
 
@@ -18,8 +18,8 @@ public enum ConsoleColor {
     LIGHT_BLUE(true, Ansi.Color.BLUE),
     MAGENTA(false, Ansi.Color.MAGENTA),
     LIGHT_MAGENTA(true, Ansi.Color.MAGENTA),
-    WHITE(true, Ansi.Color.WHITE),
     GRAY(false, Ansi.Color.WHITE),
+    WHITE(true, Ansi.Color.WHITE),
     DARK_GRAY(true, Ansi.Color.BLACK),
     BLACK(false, Ansi.Color.BLACK);
 
