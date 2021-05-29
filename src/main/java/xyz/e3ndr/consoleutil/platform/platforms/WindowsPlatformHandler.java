@@ -17,7 +17,7 @@ public class WindowsPlatformHandler implements PlatformHandler {
 
     @Override
     public void setTitle(@NonNull String title) throws IOException, InterruptedException {
-        this.run("title " + title).inheritIO().start();
+        this.run("title " + title.replace("^", "^^").replace("|", "^|")).inheritIO().start();
     }
 
     @Override
