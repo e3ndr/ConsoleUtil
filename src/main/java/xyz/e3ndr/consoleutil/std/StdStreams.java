@@ -1,4 +1,4 @@
-package xyz.e3ndr.consoleutil;
+package xyz.e3ndr.consoleutil.std;
 
 import java.io.InputStream;
 import java.io.PrintStream;

@@ -11,6 +11,7 @@ import lombok.experimental.Accessors;
 import xyz.e3ndr.consoleutil.ansi.AnsiCommand;
 import xyz.e3ndr.consoleutil.ansi.ConsoleAttribute;
 import xyz.e3ndr.consoleutil.ansi.ConsoleColor;
+import xyz.e3ndr.consoleutil.std.StdStreams;
 import xyz.e3ndr.fastloggingframework.logging.LoggingUtil;
 
 @Accessors(chain = true)

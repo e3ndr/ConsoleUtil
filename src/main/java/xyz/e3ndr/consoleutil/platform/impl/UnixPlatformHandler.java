@@ -29,7 +29,6 @@ public class UnixPlatformHandler implements PlatformHandler {
     public void startConsoleWindow(String cmdLine) throws IOException, InterruptedException {
         // TODO Doesn't exactly work, as it usually cannot access the directory.
         // (Unless you give it sudo)
-
         if (isGnome()) {
             // GNOME is special, so we have to specify that we want a new window.
             new ProcessBuilder("gnome-terminal", "--window", "--", cmdLine).start();
