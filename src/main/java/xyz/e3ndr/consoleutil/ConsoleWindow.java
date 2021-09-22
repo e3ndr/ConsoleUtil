@@ -17,6 +17,7 @@ import xyz.e3ndr.fastloggingframework.logging.LoggingUtil;
 public class ConsoleWindow {
     private StringBuilder buffer = new StringBuilder();
     private @Getter @Setter boolean autoFlushing = true;
+    private @Getter @Setter StdStreams std = StdStreams.CURRENT;
 
     /**
      * Instantiates a new console window.
@@ -36,7 +37,7 @@ public class ConsoleWindow {
 
     private void writeOut(String str) {
         if (this.autoFlushing) {
-            System.out.print(str);
+            this.std.out.print(str);
         } else {
             this.buffer.append(str);
         }
@@ -45,10 +46,10 @@ public class ConsoleWindow {
     /**
      * Cursors to a specific point in this instance, for chaining.
      *
-     * @param  x the x
-     * @param  y the y
+     * @param x the x
+     * @param y the y
      * 
-     * @return   this instance, for chaining
+     * @return this instance, for chaining
      */
     public ConsoleWindow cursorTo(int x, int y) {
         this.writeCommand(AnsiCommand.CURSOR_MOVE, y + 1, x + 1);
@@ -59,9 +60,9 @@ public class ConsoleWindow {
     /**
      * Cursors up by a specified amount.
      *
-     * @param  amount the amount
+     * @param amount the amount
      * 
-     * @return        this instance, for chaining
+     * @return this instance, for chaining
      */
     public ConsoleWindow cursorUp(int amount) {
         this.writeCommand(AnsiCommand.CURSOR_UP, amount);
@@ -72,9 +73,9 @@ public class ConsoleWindow {
     /**
      * Cursors down by a specified amount.
      *
-     * @param  amount the amount
+     * @param amount the amount
      * 
-     * @return        this instance, for chaining
+     * @return this instance, for chaining
      */
     public ConsoleWindow cursorDown(int amount) {
         this.writeCommand(AnsiCommand.CURSOR_DOWN, amount);
@@ -85,9 +86,9 @@ public class ConsoleWindow {
     /**
      * Cursors left by a specified amount.
      *
-     * @param  amount the amount
+     * @param amount the amount
      * 
-     * @return        this instance, for chaining
+     * @return this instance, for chaining
      */
     public ConsoleWindow cursorLeft(int amount) {
         this.writeCommand(AnsiCommand.CURSOR_LEFT, amount);
@@ -98,9 +99,9 @@ public class ConsoleWindow {
     /**
      * Cursors right by a specified amount.
      *
-     * @param  amount the amount
+     * @param amount the amount
      * 
-     * @return        this instance, for chaining
+     * @return this instance, for chaining
      */
     public ConsoleWindow cursorRight(int amount) {
         this.writeCommand(AnsiCommand.CURSOR_RIGHT, amount);
@@ -144,10 +145,10 @@ public class ConsoleWindow {
     /**
      * Writes text. This has a built in String.format implementation.
      *
-     * @param  format the format
-     * @param  args   the args
+     * @param format the format
+     * @param args   the args
      * 
-     * @return        this instance, for chaining
+     * @return this instance, for chaining
      */
     public ConsoleWindow write(@Nullable Object format, @Nullable Object... args) {
         String line = LoggingUtil.parseFormat(format, args);
@@ -161,12 +162,12 @@ public class ConsoleWindow {
      * Writes text at a specified location. This has a built in String.format
      * implementation.
      *
-     * @param  x      the x
-     * @param  y      the y
-     * @param  format the format
-     * @param  args   the args
+     * @param x      the x
+     * @param y      the y
+     * @param format the format
+     * @param args   the args
      * 
-     * @return        this instance, for chaining
+     * @return this instance, for chaining
      */
     public ConsoleWindow writeAt(int x, int y, @Nullable Object format, @Nullable Object... args) {
         String line = LoggingUtil.parseFormat(format, args);
@@ -182,12 +183,12 @@ public class ConsoleWindow {
     /**
      * Prints a loading bar.
      *
-     * @param  style       the style
-     * @param  progress    the progress
-     * @param  size        the size
-     * @param  showPercent the show percent
+     * @param style       the style
+     * @param progress    the progress
+     * @param size        the size
+     * @param showPercent the show percent
      * 
-     * @return             this instance, for chaining
+     * @return this instance, for chaining
      */
     public ConsoleWindow loadingBar(@NonNull BarStyle style, double progress, int size, boolean showPercent) {
         this.write(style.format(progress, size, showPercent));
@@ -198,14 +199,14 @@ public class ConsoleWindow {
     /**
      * Prints a loading bar.
      *
-     * @param  x           the x
-     * @param  y           the y
-     * @param  style       the style
-     * @param  progress    the progress
-     * @param  size        the size
-     * @param  showPercent the show percent
+     * @param x           the x
+     * @param y           the y
+     * @param style       the style
+     * @param progress    the progress
+     * @param size        the size
+     * @param showPercent the show percent
      * 
-     * @return             this instance, for chaining
+     * @return this instance, for chaining
      */
     public ConsoleWindow loadingBar(int x, int y, @NonNull BarStyle style, double progress, int size, boolean showPercent) {
         this.saveCursorPosition();
@@ -220,10 +221,10 @@ public class ConsoleWindow {
      * Replaces a line with specified format. This has a built in String.format
      * implementation.
      *
-     * @param  format the format
-     * @param  args   the args
+     * @param format the format
+     * @param args   the args
      * 
-     * @return        this instance, for chaining
+     * @return this instance, for chaining
      */
     public ConsoleWindow replaceLine(@Nullable Object format, @Nullable Object... args) {
         String line = LoggingUtil.parseFormat(format, args);
@@ -238,11 +239,11 @@ public class ConsoleWindow {
      * Replaces a specified line with specified format. This has a built in
      * String.format implementation.
      *
-     * @param  y      the y
-     * @param  format the format
-     * @param  args   the args
+     * @param y      the y
+     * @param format the format
+     * @param args   the args
      * 
-     * @return        this instance, for chaining
+     * @return this instance, for chaining
      */
     public ConsoleWindow replaceLineAt(int y, @Nullable Object format, @Nullable Object... args) {
         String line = LoggingUtil.parseFormat(format, args);
@@ -259,9 +260,9 @@ public class ConsoleWindow {
     /**
      * Sets the text color.
      *
-     * @param  color the color
+     * @param color the color
      * 
-     * @return       this instance, for chaining
+     * @return this instance, for chaining
      */
     public ConsoleWindow setTextColor(@NonNull ConsoleColor color) {
         this.writeOut(color.getForeground());
@@ -272,9 +273,9 @@ public class ConsoleWindow {
     /**
      * Sets the background color.
      *
-     * @param  color the color
+     * @param color the color
      * 
-     * @return       this instance, for chaining
+     * @return this instance, for chaining
      */
     public ConsoleWindow setBackgroundColor(@NonNull ConsoleColor color) {
         this.writeOut(color.getBackground());
@@ -296,9 +297,9 @@ public class ConsoleWindow {
     /**
      * Clears the line denoted by the y position parameter.
      *
-     * @param  y the y
+     * @param y the y
      * 
-     * @return   this instance, for chaining
+     * @return this instance, for chaining
      */
     public ConsoleWindow clearLine(int y) {
         this.saveCursorPosition();
@@ -312,9 +313,9 @@ public class ConsoleWindow {
     /**
      * Sets the attributes.
      *
-     * @param  attributes the attributes
+     * @param attributes the attributes
      * 
-     * @return            this instance, for chaining
+     * @return this instance, for chaining
      */
     public ConsoleWindow setAttributes(@NonNull ConsoleAttribute... attributes) {
         for (ConsoleAttribute attribute : attributes) {
@@ -330,8 +331,8 @@ public class ConsoleWindow {
      * @return this instance, for chaining
      */
     public ConsoleWindow update() {
-        System.out.print(this.buffer);
-        System.out.flush();
+        this.std.out.print(this.buffer);
+        this.std.out.flush();
         this.buffer.setLength(0);
 
         return this;
