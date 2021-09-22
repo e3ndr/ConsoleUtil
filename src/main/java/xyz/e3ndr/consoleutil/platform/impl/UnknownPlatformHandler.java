@@ -1,4 +1,4 @@
-package xyz.e3ndr.consoleutil.platform.platforms;
+package xyz.e3ndr.consoleutil.platform.impl;
 
 import java.io.IOException;
 
@@ -23,7 +23,7 @@ public class UnknownPlatformHandler implements PlatformHandler {
     }
 
     @Override
-    public void summonConsoleWindow(String line) throws IOException, InterruptedException {
+    public void startConsoleWindow(String cmdLine) throws IOException, InterruptedException {
         throw new UnsupportedOperationException();
     }
 

@@ -2,9 +2,9 @@ package xyz.e3ndr.consoleutil.platform;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import xyz.e3ndr.consoleutil.platform.platforms.UnixPlatformHandler;
-import xyz.e3ndr.consoleutil.platform.platforms.UnknownPlatformHandler;
-import xyz.e3ndr.consoleutil.platform.platforms.WindowsPlatformHandler;
+import xyz.e3ndr.consoleutil.platform.impl.UnixPlatformHandler;
+import xyz.e3ndr.consoleutil.platform.impl.UnknownPlatformHandler;
+import xyz.e3ndr.consoleutil.platform.impl.WindowsPlatformHandler;
 
 @AllArgsConstructor
 public enum JavaPlatform {

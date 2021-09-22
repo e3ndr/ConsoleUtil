@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import xyz.e3ndr.consoleutil.platform.JavaPlatform;
 import xyz.e3ndr.consoleutil.platform.PlatformHandler;
+import xyz.e3ndr.fastloggingframework.FastLoggingFramework;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class ConsoleUtil {
@@ -71,7 +72,7 @@ public class ConsoleUtil {
     /**
      * Sets the title.
      *
-     * @param  title                         the new title
+     * @param title the new title
      * 
      * @throws IOException                   Signals that an I/O exception has
      *                                       occurred during the underlying system
@@ -88,8 +89,8 @@ public class ConsoleUtil {
     /**
      * Sets the size.
      *
-     * @param  width                         the width
-     * @param  height                        the height
+     * @param width  the width
+     * @param height the height
      * 
      * @throws IOException                   Signals that an I/O exception has
      *                                       occurred during the underlying system
@@ -129,11 +130,31 @@ public class ConsoleUtil {
             if (entryFile.exists()) { // If the entry is a file, not a main method.
                 args[0] = '"' + entryFile.getCanonicalPath() + '"'; // Use raw file path.
 
-                handler.summonConsoleWindow(String.format("\"%s/bin/java\" -DStartedWithConsole=true %s -cp \"%s\" -jar %s", javaHome, jvmArgs, classpath, String.join(" ", args)));
+                handler.startConsoleWindow(String.format("\"%s/bin/java\" -DStartedWithConsole=true %s -cp \"%s\" -jar %s", javaHome, jvmArgs, classpath, String.join(" ", args)));
             } else {
-                handler.summonConsoleWindow(String.format("\"%s/bin/java\" -DStartedWithConsole=true %s -cp \"%s\" %s", javaHome, jvmArgs, classpath, entry));
+                handler.startConsoleWindow(String.format("\"%s/bin/java\" -DStartedWithConsole=true %s -cp \"%s\" %s", javaHome, jvmArgs, classpath, entry));
             }
+
+            FastLogger.logStatic("Program requested restart under a console window.");
+
+            FastLoggingFramework.close(); // Flush logger
+            System.exit(0); // Orphan the child process
         }
+    }
+
+    /**
+     * Restarts the JVM with a console window.
+     *
+     * @throws IOException                   Signals that an I/O exception has
+     *                                       occurred during the underlying system
+     *                                       call.
+     * @throws InterruptedException          if there is an error while waiting for
+     *                                       a system call.
+     * @throws UnsupportedOperationException if there is no system specific
+     *                                       implementation.
+     */
+    public static void startConsoleWindow(String cmdLine) throws IOException, InterruptedException {
+        handler.startConsoleWindow(cmdLine);
     }
 
     /**

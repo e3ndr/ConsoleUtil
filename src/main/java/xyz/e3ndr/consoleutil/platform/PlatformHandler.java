@@ -25,7 +25,7 @@ public interface PlatformHandler {
     /**
      * Sets the title.
      *
-     * @param  title                         the new title
+     * @param title the new title
      * 
      * @throws IOException                   Signals that an I/O exception has
      *                                       occurred during the underlying system
@@ -40,8 +40,8 @@ public interface PlatformHandler {
     /**
      * Sets the size.
      *
-     * @param  width                         the width
-     * @param  height                        the height
+     * @param width  the width
+     * @param height the height
      * 
      * @throws IOException                   Signals that an I/O exception has
      *                                       occurred during the underlying system
@@ -54,9 +54,9 @@ public interface PlatformHandler {
     public void setSize(int width, int height) throws IOException, InterruptedException;
 
     /**
-     * Restarts the JVM with a console window.
+     * Executes the provided cmdLine in a new console window.
      * 
-     * @param  line
+     * @param cmdLine
      *
      * @throws IOException                   Signals that an I/O exception has
      *                                       occurred during the underlying system
@@ -66,6 +66,6 @@ public interface PlatformHandler {
      * @throws UnsupportedOperationException if there is no system specific
      *                                       implementation.
      */
-    public void summonConsoleWindow(String line) throws IOException, InterruptedException;
+    public void startConsoleWindow(String cmdLine) throws IOException, InterruptedException;
 
 }

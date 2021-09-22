@@ -1,14 +1,11 @@
-package xyz.e3ndr.consoleutil.platform.platforms;
+package xyz.e3ndr.consoleutil.platform.impl;
 
 import java.io.IOException;
 
 import lombok.NonNull;
 import xyz.e3ndr.consoleutil.platform.PlatformHandler;
-import xyz.e3ndr.fastloggingframework.FastLoggingFramework;
-import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class WindowsPlatformHandler implements PlatformHandler {
-    private FastLogger logger = new FastLogger("ConsoleUtil.WindowsPlatformHandler");
 
     @Override
     public void clearConsole() throws IOException, InterruptedException {
@@ -26,17 +23,11 @@ public class WindowsPlatformHandler implements PlatformHandler {
     }
 
     @Override
-    public void summonConsoleWindow(String line) throws IOException, InterruptedException {
-        this.logger.info("Program requested restart under a console window.");
-
-        this.run(String.format("start \"\" %s", line)).start();
-
-        FastLoggingFramework.close(); // Flush logger
-        System.exit(0); // Orphan the child process
+    public void startConsoleWindow(String cmdLine) throws IOException, InterruptedException {
+        this.run(String.format("start \"\" %s", cmdLine)).start();
     }
 
     private ProcessBuilder run(String command) {
-        this.logger.debug("Running command: %s", command);
         return new ProcessBuilder("cmd", "/c", command);
     }
 
