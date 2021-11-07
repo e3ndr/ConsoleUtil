@@ -3,166 +3,148 @@ package xyz.e3ndr.consoleutil.ipc;
 import java.io.File;
 import java.io.IOException;
 import java.nio.CharBuffer;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.nio.file.StandardOpenOption;
 
 import lombok.Getter;
+import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class MemoryMappedIpc implements IpcChannel {
-    private static final int HOST_FLAG_OFFSET = 0;
-    private static final int CHILD_FLAG_OFFSET = 0;
-    private static final int HOST_WRITE_OFFSET = 128;
-    private static final int CHILD_WRITE_OFFSET = 512;
+    private static final long WAIT_TIME = 500;
 
-    private static final int MAX_WRITE_SIZE = 128;
+    private static final int SIZE = 1024;
 
     private static class FLAGS {
-        private static final int WRITE_FLAG = 0;
-        private static final int READY_FLAG = 1;
+        private static final int READY_FLAG = 0;
     }
 
     private @Getter boolean isChild = false;
     private @Getter String ipcId;
 
-    private CharBuffer charBuf;
-    private FileChannel fileChannel;
+    private FileChannel sendFileChannel;
+    private CharBuffer sendCharBuf;
+    private FileChannel recvFileChannel;
+    private CharBuffer recvCharBuf;
 
     private StringBuilder recvBuffer = new StringBuilder();
     private StringBuilder sendBuffer = new StringBuilder();
 
-    /*
-     * Memory Layout:
-     * 
-     *   0-127   Flags
-     *       0: Host Write Flag
-     *       1: Host Ready Flag
-     *      64: Child Write Flag
-     *      65: Child Ready Flag
-     *   
-     * 128-511   Host Write Range
-     * 512-640   Child Write Range
-     * 
-     * Total: 640bytes
-     */
-
-    /*
-     * Example message sending from host to child:
-     * 
-     * Child sets ready flag to 1.
-     * Host sets ready flag to 1.
-     * Host writes "Hello World\0" to it's write range.
-     * Host sets child's ready flag to 0.
-     * Host sets the write flag to 1.
-     * Child sets host's ready flag to 0.
-     */
+    private FastLogger logger;
 
     private MemoryMappedIpc(String ipcId, boolean isChild) throws IOException {
-        this.fileChannel = FileChannel.open(
-            new File(String.format("%s/%s.memipc", System.getProperty("java.io.tmpdir"), ipcId)).toPath(),
-            StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE
-        );
+        String sendFile;
+        String recvFile;
 
-        MappedByteBuffer buf = this.fileChannel.map(MapMode.READ_WRITE, 0, 4096);
-        this.charBuf = buf.asCharBuffer();
+        if (isChild) {
+            // Flip them.
+            recvFile = String.format("%s-1.memipc", ipcId);
+            sendFile = String.format("%s-2.memipc", ipcId);
+            this.logger = new FastLogger(String.format("Child IPC (%s)", ipcId));
+        } else {
+            sendFile = String.format("%s-1.memipc", ipcId);
+            recvFile = String.format("%s-2.memipc", ipcId);
+            this.logger = new FastLogger(String.format("Host IPC (%s)", ipcId));
+        }
 
-        this.charBuf.put(this.getMyFlagOffset() + FLAGS.READY_FLAG, (char) 1);
+        this.logger.debug("My send file: %s", sendFile);
+        this.logger.debug("My recv file: %s", recvFile);
+
+        long bufSizeInBytes = (SIZE + 1) * Character.BYTES;
+
+        this.sendFileChannel = FileChannel.open(new File(System.getProperty("java.io.tmpdir"), sendFile).toPath(), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+        this.sendCharBuf = this.sendFileChannel.map(MapMode.READ_WRITE, 0, bufSizeInBytes).asCharBuffer();
+
+        this.recvFileChannel = FileChannel.open(new File(System.getProperty("java.io.tmpdir"), recvFile).toPath(), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+        this.recvCharBuf = this.recvFileChannel.map(MapMode.READ_WRITE, 0, bufSizeInBytes).asCharBuffer();
+
+        if (!isChild) {
+            char[] empty = new char[SIZE];
+            this.sendCharBuf.put(empty);
+            this.recvCharBuf.put(empty);
+        }
     }
 
-    private int getMyFlagOffset() {
-        return this.isChild ? CHILD_FLAG_OFFSET : HOST_FLAG_OFFSET;
+    private void waitToWrite() throws InterruptedException {
+        while (this.sendCharBuf.get(FLAGS.READY_FLAG) != 0) {
+            Thread.sleep(WAIT_TIME);
+            this.logger.debug("Not ready to write.");
+        }
+        this.logger.debug("Ready to write.");
     }
 
-    private int getTheirFlagOffset() {
-        return this.isChild ? HOST_FLAG_OFFSET : CHILD_FLAG_OFFSET;
-    }
-
-    private int getMyWriteRange() {
-        return this.isChild ? CHILD_WRITE_OFFSET : HOST_WRITE_OFFSET;
-    }
-
-    private int getTheirWriteRange() {
-        return this.isChild ? HOST_WRITE_OFFSET : CHILD_WRITE_OFFSET;
-    }
-
-    private boolean isWriteLocked() {
-        boolean myWriteFlag = this.charBuf.get(this.getMyFlagOffset() + FLAGS.WRITE_FLAG) > 0;
-        boolean theirReadyFlag = this.charBuf.get(this.getTheirFlagOffset() + FLAGS.READY_FLAG) > 0;
-
-        return !myWriteFlag && !theirReadyFlag;
-    }
-
-    private boolean shouldRead() {
-        boolean theirWriteFlag = this.charBuf.get(this.getTheirFlagOffset() + FLAGS.WRITE_FLAG) > 0;
-        boolean myReadyFlag = this.charBuf.get(this.getMyFlagOffset() + FLAGS.READY_FLAG) > 0;
-
-        return !theirWriteFlag && !myReadyFlag;
+    private void waitToRead() throws InterruptedException {
+        while (this.recvCharBuf.get(FLAGS.READY_FLAG) != 1) {
+            Thread.sleep(WAIT_TIME);
+            this.logger.debug("Not ready to read.");
+        }
+        this.logger.debug("Ready to read.");
     }
 
     @Override
-    public void write(String str) throws IOException, InterruptedException {
+    public synchronized void write(String str) throws IOException, InterruptedException {
         this.sendBuffer = new StringBuilder(str).append('\0');
 
-        this.charBuf.put(this.getMyFlagOffset() + FLAGS.READY_FLAG, '\0');
-
         do {
-            while (this.isWriteLocked() || (this.recvBuffer.length() > 0)) {
-                Thread.sleep(100);
-            }
+            this.waitToWrite();
 
-            String sub = this.sendBuffer.substring(0, Math.min(MAX_WRITE_SIZE - 1, this.sendBuffer.length()));
+            String sub = this.sendBuffer.substring(0, Math.min(SIZE, this.sendBuffer.length()));
             this.sendBuffer.delete(0, sub.length());
 
-            this.charBuf.position(this.getMyWriteRange());
-            this.charBuf.put(sub);
+            this.sendCharBuf.position(1);
+            this.sendCharBuf.put(sub);
 
-            this.charBuf.put(this.getTheirFlagOffset() + FLAGS.READY_FLAG, '\0');
-            this.charBuf.put(this.getMyFlagOffset() + FLAGS.WRITE_FLAG, '\1');
+            // Signal that there's data to be read.
+            this.sendCharBuf.put(FLAGS.READY_FLAG, (char) 1);
         } while (this.sendBuffer.length() > 0);
 
-        this.charBuf.put(this.getMyFlagOffset() + FLAGS.READY_FLAG, '\1');
+        this.logger.debug("Finished sending string.");
     }
 
     @Override
-    public String read() throws IOException, InterruptedException {
+    public synchronized String read() throws IOException, InterruptedException {
+        this.recvCharBuf.put(FLAGS.READY_FLAG, (char) 0);
+
         boolean isReading = true;
+
         while (isReading) {
-            while (!this.shouldRead()) {
-                Thread.sleep(100);
-            }
+            this.waitToRead();
 
-            char[] buf = new char[MAX_WRITE_SIZE];
-            this.charBuf.position(this.getTheirWriteRange());
-            this.charBuf.get(buf, 0, MAX_WRITE_SIZE);
+            char[] read = new char[SIZE];
+            this.recvCharBuf.position(1);
+            this.recvCharBuf.get(read);
 
-            int i = 0;
-            while (i < MAX_WRITE_SIZE) {
-                if (buf[i] == 0) {
+            int contentLen = 0;
+            while (contentLen < SIZE) {
+                if (read[contentLen] == 0) {
                     isReading = false;
+                    this.logger.debug("Reached the end of the string.");
                     break;
                 }
-                i++;
+                contentLen++;
             }
 
-            String content = new String(buf);
-            this.recvBuffer.append(content.substring(i));
+            String content = new String(read).substring(0, contentLen);
+            this.recvBuffer.append(content);
 
-            System.out.println(content);
+            // Ready to read more.
+            this.recvCharBuf.put(FLAGS.READY_FLAG, (char) 0);
         }
 
         String result = this.recvBuffer.toString();
         this.recvBuffer.setLength(0);
+
         return result;
     }
 
     @Override
     public void close() throws IOException {
-        this.fileChannel.close();
+        this.sendFileChannel.close();
+        this.recvFileChannel.close();
     }
 
     public static MemoryMappedIpc startHostIpc(String ipcId) throws IOException, InterruptedException {
-        return new MemoryMappedIpc(ipcId, true);
+        return new MemoryMappedIpc(ipcId, false);
     }
 
     public static MemoryMappedIpc startChildIpc(String ipcId) throws IOException, InterruptedException {
