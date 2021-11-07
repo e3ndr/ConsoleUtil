@@ -1,4 +1,4 @@
-package xyz.e3ndr.consoleutil;
+package xyz.e3ndr.consoleutil.consolewindow;
 
 public class BarStyle {
 

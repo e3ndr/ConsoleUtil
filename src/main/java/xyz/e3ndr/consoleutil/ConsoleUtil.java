@@ -10,6 +10,8 @@ import jline.Terminal;
 import jline.TerminalFactory;
 import lombok.Getter;
 import lombok.NonNull;
+import xyz.e3ndr.consoleutil.consolewindow.ConsoleWindow;
+import xyz.e3ndr.consoleutil.consolewindow.impl.AttachedConsoleWindowImpl;
 import xyz.e3ndr.consoleutil.platform.JavaPlatform;
 import xyz.e3ndr.consoleutil.platform.PlatformHandler;
 import xyz.e3ndr.fastloggingframework.FastLoggingFramework;
@@ -55,6 +57,21 @@ public class ConsoleUtil {
     }
 
     /**
+     * Gets the current attached console window.
+     *
+     * @throws IOException                   Signals that an I/O exception has
+     *                                       occurred during the underlying system
+     *                                       call.
+     * @throws InterruptedException          if there is an error while waiting for
+     *                                       a system call.
+     * @throws UnsupportedOperationException if there is no system specific
+     *                                       implementation.
+     */
+    public static ConsoleWindow getAttachedConsoleWindow() throws IOException, InterruptedException {
+        return new AttachedConsoleWindowImpl();
+    }
+
+    /**
      * Clears the console window.
      *
      * @throws IOException                   Signals that an I/O exception has
@@ -72,7 +89,7 @@ public class ConsoleUtil {
     /**
      * Sets the title.
      *
-     * @param title the new title
+     * @param  title                         the new title
      * 
      * @throws IOException                   Signals that an I/O exception has
      *                                       occurred during the underlying system
@@ -89,8 +106,8 @@ public class ConsoleUtil {
     /**
      * Sets the size.
      *
-     * @param width  the width
-     * @param height the height
+     * @param  width                         the width
+     * @param  height                        the height
      * 
      * @throws IOException                   Signals that an I/O exception has
      *                                       occurred during the underlying system
