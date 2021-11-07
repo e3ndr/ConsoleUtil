@@ -126,7 +126,7 @@ public interface ConsoleWindow {
      * 
      * @return             this instance, for chaining
      */
-    public ConsoleWindow loadingBar(int x, int y, @NonNull BarStyle style, double progress, int size, boolean showPercent);
+    public ConsoleWindow loadingBarAt(int x, int y, @NonNull BarStyle style, double progress, int size, boolean showPercent);
 
     /**
      * Replaces a line with specified format. This has a built in String.format

@@ -127,7 +127,7 @@ public class AttachedConsoleWindowImpl implements ConsoleWindow {
     }
 
     @Override
-    public ConsoleWindow loadingBar(int x, int y, @NonNull BarStyle style, double progress, int size, boolean showPercent) {
+    public ConsoleWindow loadingBarAt(int x, int y, @NonNull BarStyle style, double progress, int size, boolean showPercent) {
         this.saveCursorPosition();
         this.cursorTo(x, y);
         this.write(style.format(progress, size, showPercent));
