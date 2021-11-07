@@ -5,13 +5,15 @@ import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.util.UUID;
 
 import jline.Terminal;
 import jline.TerminalFactory;
 import lombok.Getter;
 import lombok.NonNull;
 import xyz.e3ndr.consoleutil.consolewindow.ConsoleWindow;
-import xyz.e3ndr.consoleutil.consolewindow.impl.AttachedConsoleWindowImpl;
+import xyz.e3ndr.consoleutil.consolewindow.impl.AttachedConsoleWindow;
+import xyz.e3ndr.consoleutil.consolewindow.impl.RemoteConsoleWindow;
 import xyz.e3ndr.consoleutil.platform.JavaPlatform;
 import xyz.e3ndr.consoleutil.platform.PlatformHandler;
 import xyz.e3ndr.fastloggingframework.FastLoggingFramework;
@@ -68,7 +70,24 @@ public class ConsoleUtil {
      *                                       implementation.
      */
     public static ConsoleWindow getAttachedConsoleWindow() throws IOException, InterruptedException {
-        return new AttachedConsoleWindowImpl();
+        return new AttachedConsoleWindow();
+    }
+
+    /**
+     * Opens another console window that you can interact with separately.
+     *
+     * @throws IOException                   Signals that an I/O exception has
+     *                                       occurred during the underlying system
+     *                                       call.
+     * @throws InterruptedException          if there is an error while waiting for
+     *                                       a system call.
+     * @throws UnsupportedOperationException if there is no system specific
+     *                                       implementation.
+     */
+    public static ConsoleWindow openAnotherConsoleWindow() throws IOException, InterruptedException {
+        String ipcId = UUID.randomUUID().toString();
+
+        return new RemoteConsoleWindow(ipcId);
     }
 
     /**

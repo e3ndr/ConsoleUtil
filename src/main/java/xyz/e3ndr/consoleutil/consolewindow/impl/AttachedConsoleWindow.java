@@ -18,13 +18,13 @@ import xyz.e3ndr.consoleutil.std.StdStreams;
 import xyz.e3ndr.fastloggingframework.logging.LoggingUtil;
 
 @Accessors(chain = true)
-public class AttachedConsoleWindowImpl implements ConsoleWindow {
+public class AttachedConsoleWindow implements ConsoleWindow {
     private StringBuilder buffer = new StringBuilder();
     private @Getter @Setter StdStreams std = StdStreams.CURRENT;
 
     private @Getter @Setter boolean autoFlushing = true;
 
-    public AttachedConsoleWindowImpl() throws IOException, InterruptedException {
+    public AttachedConsoleWindow() throws IOException, InterruptedException {
         ConsoleUtil.clearConsole();
 
         ConsoleUtil.getJLine().setEchoEnabled(false);
@@ -121,7 +121,7 @@ public class AttachedConsoleWindowImpl implements ConsoleWindow {
 
     @Override
     public ConsoleWindow loadingBar(@NonNull BarStyle style, double progress, int size, boolean showPercent) {
-        this.write(style.format(progress, size, showPercent));
+        this.writeOut(style.format(progress, size, showPercent));
 
         return this;
     }
@@ -130,7 +130,7 @@ public class AttachedConsoleWindowImpl implements ConsoleWindow {
     public ConsoleWindow loadingBarAt(int x, int y, @NonNull BarStyle style, double progress, int size, boolean showPercent) {
         this.saveCursorPosition();
         this.cursorTo(x, y);
-        this.write(style.format(progress, size, showPercent));
+        this.writeOut(style.format(progress, size, showPercent));
         this.restoreCursorPosition();
 
         return this;
@@ -214,5 +214,8 @@ public class AttachedConsoleWindowImpl implements ConsoleWindow {
 
         return this;
     }
+
+    @Override
+    public void close() throws IOException {}
 
 }

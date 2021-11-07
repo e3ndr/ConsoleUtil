@@ -11,7 +11,7 @@ import lombok.Getter;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class MemoryMappedIpc implements IpcChannel {
-    private static final long WAIT_TIME = 500;
+    private static final long WAIT_TIME = 50;
 
     private static final int SIZE = 1024;
 
@@ -29,6 +29,8 @@ public class MemoryMappedIpc implements IpcChannel {
 
     private StringBuilder recvBuffer = new StringBuilder();
     private StringBuilder sendBuffer = new StringBuilder();
+
+    private boolean closed = false;
 
     private FastLogger logger;
 
@@ -63,12 +65,18 @@ public class MemoryMappedIpc implements IpcChannel {
             this.sendCharBuf.put(empty);
             this.recvCharBuf.put(empty);
         }
+
+        this.sendCharBuf.put(0, (char) 1);
     }
 
     private void waitToWrite() throws InterruptedException {
         while (this.sendCharBuf.get(FLAGS.READY_FLAG) != 0) {
             Thread.sleep(WAIT_TIME);
             this.logger.debug("Not ready to write.");
+
+            if (this.closed) {
+                throw new InterruptedException("IPC channel was closed.");
+            }
         }
         this.logger.debug("Ready to write.");
     }
@@ -77,12 +85,16 @@ public class MemoryMappedIpc implements IpcChannel {
         while (this.recvCharBuf.get(FLAGS.READY_FLAG) != 1) {
             Thread.sleep(WAIT_TIME);
             this.logger.debug("Not ready to read.");
+
+            if (this.closed) {
+                throw new InterruptedException("IPC channel was closed.");
+            }
         }
         this.logger.debug("Ready to read.");
     }
 
     @Override
-    public synchronized void write(String str) throws IOException, InterruptedException {
+    public void write(String str) throws IOException, InterruptedException {
         this.sendBuffer = new StringBuilder(str).append('\0');
 
         do {
@@ -102,12 +114,13 @@ public class MemoryMappedIpc implements IpcChannel {
     }
 
     @Override
-    public synchronized String read() throws IOException, InterruptedException {
-        this.recvCharBuf.put(FLAGS.READY_FLAG, (char) 0);
-
+    public String read() throws IOException, InterruptedException {
         boolean isReading = true;
 
         while (isReading) {
+            // Ready to read more.
+            this.recvCharBuf.put(FLAGS.READY_FLAG, (char) 0);
+
             this.waitToRead();
 
             char[] read = new char[SIZE];
@@ -126,10 +139,10 @@ public class MemoryMappedIpc implements IpcChannel {
 
             String content = new String(read).substring(0, contentLen);
             this.recvBuffer.append(content);
-
-            // Ready to read more.
-            this.recvCharBuf.put(FLAGS.READY_FLAG, (char) 0);
         }
+
+        // No longer ready to read.
+        this.recvCharBuf.put(FLAGS.READY_FLAG, (char) 1);
 
         String result = this.recvBuffer.toString();
         this.recvBuffer.setLength(0);
@@ -139,6 +152,7 @@ public class MemoryMappedIpc implements IpcChannel {
 
     @Override
     public void close() throws IOException {
+        closed = true;
         this.sendFileChannel.close();
         this.recvFileChannel.close();
     }

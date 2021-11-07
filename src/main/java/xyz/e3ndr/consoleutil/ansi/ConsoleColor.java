@@ -8,18 +8,25 @@ import lombok.Getter;
 public enum ConsoleColor {
     RED(false, Ansi.Color.RED),
     LIGHT_RED(true, Ansi.Color.RED),
+
     YELLOW(false, Ansi.Color.YELLOW),
     LIGHT_YELLOW(true, Ansi.Color.YELLOW),
+
     GREEN(false, Ansi.Color.GREEN),
     LIGHT_GREEN(true, Ansi.Color.GREEN),
+
     CYAN(false, Ansi.Color.CYAN),
     LIGHT_CYAN(true, Ansi.Color.CYAN),
+
     BLUE(false, Ansi.Color.BLUE),
     LIGHT_BLUE(true, Ansi.Color.BLUE),
+
     MAGENTA(false, Ansi.Color.MAGENTA),
     LIGHT_MAGENTA(true, Ansi.Color.MAGENTA),
+
     GRAY(false, Ansi.Color.WHITE),
     WHITE(true, Ansi.Color.WHITE),
+
     DARK_GRAY(true, Ansi.Color.BLACK),
     BLACK(false, Ansi.Color.BLACK);
 

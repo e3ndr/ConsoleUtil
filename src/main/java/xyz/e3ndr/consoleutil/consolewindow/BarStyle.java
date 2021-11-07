@@ -48,6 +48,16 @@ public class BarStyle {
         this.full = full;
     }
 
+    @Deprecated
+    public BarStyle(JsonObject json) {
+        this(
+            (char) json.getNumber("opening").intValue(),
+            (char) json.getNumber("closing").intValue(),
+            (char) json.getNumber("empty").intValue(),
+            (char) json.getNumber("full").intValue()
+        );
+    }
+
     /**
      * Instantiates a new bar style.
      *
@@ -86,7 +96,14 @@ public class BarStyle {
         sb.append(this.closing);
 
         if (showPercent) {
-            sb.append(String.format(" (%.0f%%)", progress * 100));
+            double percent = progress * 100;
+
+            if (percent < 10) {
+                // Add an additional space of padding to make it fit properly.
+                sb.append(' ');
+            }
+
+            sb.append(String.format(" (%.0f%%)", percent));
         }
 
         return sb.toString();

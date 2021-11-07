@@ -1,13 +1,18 @@
 package xyz.e3ndr.consoleutil.consolewindow.impl;
 
+import java.io.File;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 
 import org.jetbrains.annotations.Nullable;
 
+import co.casterlabs.rakurai.json.Rson;
 import co.casterlabs.rakurai.json.element.JsonArray;
 import co.casterlabs.rakurai.json.element.JsonObject;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.SneakyThrows;
+import xyz.e3ndr.consoleutil.ConsoleUtil;
 import xyz.e3ndr.consoleutil.ansi.ConsoleAttribute;
 import xyz.e3ndr.consoleutil.ansi.ConsoleColor;
 import xyz.e3ndr.consoleutil.consolewindow.BarStyle;
@@ -16,17 +21,46 @@ import xyz.e3ndr.consoleutil.ipc.IpcChannel;
 import xyz.e3ndr.consoleutil.ipc.MemoryMappedIpc;
 import xyz.e3ndr.fastloggingframework.logging.LoggingUtil;
 
-public class RemoteConsoleWindowImpl implements ConsoleWindow {
+public class RemoteConsoleWindow implements ConsoleWindow {
     private boolean autoFlushing = true;
+    private boolean closed = false;
 
-    private IpcChannel ipcChannel;
+    private @Getter IpcChannel ipcChannel;
 
-    public RemoteConsoleWindowImpl(String ipcId) throws IOException, InterruptedException {
+    public RemoteConsoleWindow(String ipcId) throws IOException, InterruptedException {
+        startWindow(ipcId);
+
         this.ipcChannel = MemoryMappedIpc.startHostIpc(ipcId);
+
+        Thread t = new Thread(() -> {
+            while (!this.closed) {
+                try {
+                    JsonObject command = Rson.DEFAULT.fromJson(this.ipcChannel.read(), JsonObject.class);
+
+                    this.parseCommand(command);
+                } catch (Exception ignored) {}
+            }
+        });
+
+        t.setDaemon(true);
+        t.setName("Remote Console Window (ipcId = " + ipcId + ")");
+        t.start();
+    }
+
+    @SneakyThrows
+    private void parseCommand(JsonObject command) {
+        switch (command.getString("type")) {
+            // TODO
+        }
     }
 
     @SneakyThrows
     private void safeIpcWrite(JsonObject packet) {
+        if (this.closed) {
+            throw new RuntimeException("ConsoleWindow is closed.");
+        }
+
+        System.out.println(packet);
         this.ipcChannel.write(packet.toString());
     }
 
@@ -137,7 +171,7 @@ public class RemoteConsoleWindowImpl implements ConsoleWindow {
     public ConsoleWindow loadingBar(@NonNull BarStyle style, double progress, int size, boolean showPercent) {
         this.safeIpcWrite(
             new JsonObject()
-                .put("method", "loadingBar(int,int,BarStyle,double,int,boolean)")
+                .put("method", "loadingBar(BarStyle,double,int,boolean)")
                 .put("style", style.serialize())
                 .put("progress", progress)
                 .put("size", size)
@@ -189,8 +223,8 @@ public class RemoteConsoleWindowImpl implements ConsoleWindow {
     public ConsoleWindow setTextColor(@NonNull ConsoleColor color) {
         this.safeIpcWrite(
             new JsonObject()
-                .put("color", "setTextColor(ConsoleColor)")
-                .put("amount", color.name())
+                .put("method", "setTextColor(ConsoleColor)")
+                .put("color", color.name())
         );
         return this;
     }
@@ -199,7 +233,7 @@ public class RemoteConsoleWindowImpl implements ConsoleWindow {
     public ConsoleWindow setBackgroundColor(@NonNull ConsoleColor color) {
         this.safeIpcWrite(
             new JsonObject()
-                .put("method", "setTextColor(ConsoleColor)")
+                .put("method", "setBackgroundColor(ConsoleColor)")
                 .put("color", color.name())
         );
         return this;
@@ -302,6 +336,51 @@ public class RemoteConsoleWindowImpl implements ConsoleWindow {
                 .put("title", title)
         );
         return this;
+    }
+
+    @Override
+    public void close() throws IOException {
+        this.safeIpcWrite(
+            new JsonObject()
+                .put("method", "close()")
+        );
+
+        this.closed = true;
+        this.ipcChannel.close();
+    }
+
+    // Open the other window.
+    private static void startWindow(String ipcId) throws IOException, InterruptedException {
+        String jvmArgs = String.join(" ", ManagementFactory.getRuntimeMXBean().getInputArguments());
+        String entry = System.getProperty("sun.java.command"); // Tested, present in OpenJDK and Oracle
+        String classpath = System.getProperty("java.class.path");
+        String javaHome = System.getProperty("java.home");
+
+        String[] args = entry.split(" ");
+        File entryFile = new File(args[0]);
+
+        if (entryFile.exists()) { // If the entry is a file, not a main method.
+            ConsoleUtil.startConsoleWindow(
+                String.format(
+                    "\"%s/bin/java\" -DStartedWithConsole=true %s -cp \"%s,%s\" xyz.e3ndr.consoleutil.consolewindow.impl.RemoteConsoleWindowInstance %s",
+                    javaHome,
+                    jvmArgs,
+                    classpath,
+                    entryFile.getCanonicalPath(),
+                    ipcId
+                )
+            );
+        } else {
+            ConsoleUtil.startConsoleWindow(
+                String.format(
+                    "\"%s/bin/java\" -DStartedWithConsole=true %s -cp \"%s\" xyz.e3ndr.consoleutil.consolewindow.impl.RemoteConsoleWindowInstance %s",
+                    javaHome,
+                    jvmArgs,
+                    classpath,
+                    ipcId
+                )
+            );
+        }
     }
 
 }

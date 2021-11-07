@@ -1,6 +1,7 @@
 package xyz.e3ndr.consoleutil.consolewindow;
 
 import java.awt.Dimension;
+import java.io.Closeable;
 import java.io.IOException;
 
 import org.jetbrains.annotations.Nullable;
@@ -10,7 +11,7 @@ import xyz.e3ndr.consoleutil.ConsoleUtil;
 import xyz.e3ndr.consoleutil.ansi.ConsoleAttribute;
 import xyz.e3ndr.consoleutil.ansi.ConsoleColor;
 
-public interface ConsoleWindow {
+public interface ConsoleWindow extends Closeable {
 
     /**
      * Cursors to a specific point in this instance, for chaining.
