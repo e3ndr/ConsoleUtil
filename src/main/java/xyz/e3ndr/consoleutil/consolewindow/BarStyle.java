@@ -1,5 +1,7 @@
 package xyz.e3ndr.consoleutil.consolewindow;
 
+import co.casterlabs.rakurai.json.element.JsonObject;
+
 public class BarStyle {
 
     /**
@@ -88,6 +90,15 @@ public class BarStyle {
         }
 
         return sb.toString();
+    }
+
+    @Deprecated
+    public JsonObject serialize() {
+        return new JsonObject()
+            .put("opening", (int) this.opening)
+            .put("closing", (int) this.closing)
+            .put("empty", (int) this.empty)
+            .put("full", (int) this.full);
     }
 
 }
