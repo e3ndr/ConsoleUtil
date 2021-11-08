@@ -3,6 +3,7 @@ package xyz.e3ndr.consoleutil.consolewindow.impl;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.util.concurrent.TimeUnit;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -22,8 +23,12 @@ import xyz.e3ndr.consoleutil.ipc.MemoryMappedIpc;
 import xyz.e3ndr.fastloggingframework.logging.LoggingUtil;
 
 public class RemoteConsoleWindow implements ConsoleWindow {
+    private static final long TIMEOUT = TimeUnit.SECONDS.toMillis(1);
+
     private boolean autoFlushing = true;
     private boolean closed = false;
+
+    private long lastPing = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(5); // Give it some lee-way
 
     private @Getter IpcChannel ipcChannel;
 
@@ -32,19 +37,56 @@ public class RemoteConsoleWindow implements ConsoleWindow {
 
         this.ipcChannel = MemoryMappedIpc.startHostIpc(ipcId);
 
-        Thread t = new Thread(() -> {
+        Thread readThread = new Thread(() -> {
             while (!this.closed) {
                 try {
-                    JsonObject command = Rson.DEFAULT.fromJson(this.ipcChannel.read(), JsonObject.class);
+                    String line = this.ipcChannel.read();
 
-                    this.parseCommand(command);
-                } catch (Exception ignored) {}
+                    if (line.equals("PING")) {
+                        this.lastPing = System.currentTimeMillis();
+                    } else {
+                        JsonObject command = Rson.DEFAULT.fromJson(line, JsonObject.class);
+
+                        this.parseCommand(command);
+                    }
+                } catch (Exception e) {}
             }
         });
 
-        t.setDaemon(true);
-        t.setName("Remote Console Window (ipcId = " + ipcId + ")");
-        t.start();
+        readThread.setDaemon(true);
+        readThread.setName("Remote Console Window (ipcId = " + ipcId + ")");
+        readThread.start();
+
+        Thread keepAliveWatchdogThread = new Thread(() -> {
+            while (!this.closed) {
+                try {
+                    Thread.sleep(500);
+
+                    if ((System.currentTimeMillis() - this.lastPing) > TIMEOUT) {
+                        // Other end has died.
+                        this.ipcChannel.close();
+                    }
+                } catch (Exception e) {}
+            }
+        });
+
+        keepAliveWatchdogThread.setDaemon(true);
+        keepAliveWatchdogThread.setName("Remote Console Window (ipcId = " + ipcId + ")");
+        keepAliveWatchdogThread.start();
+
+        Thread keepAliveThread = new Thread(() -> {
+            while (!this.closed) {
+                try {
+                    Thread.sleep(500);
+
+                    this.ipcChannel.write("PING");
+                } catch (Exception e) {}
+            }
+        });
+
+        keepAliveThread.setDaemon(true);
+        keepAliveThread.setName("Remote Console Window (ipcId = " + ipcId + ")");
+        keepAliveThread.start();
     }
 
     @SneakyThrows
@@ -60,7 +102,6 @@ public class RemoteConsoleWindow implements ConsoleWindow {
             throw new RuntimeException("ConsoleWindow is closed.");
         }
 
-        System.out.println(packet);
         this.ipcChannel.write(packet.toString());
     }
 

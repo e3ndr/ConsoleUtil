@@ -1,6 +1,7 @@
 package xyz.e3ndr.consoleutil.consolewindow.impl;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import co.casterlabs.rakurai.json.Rson;
 import co.casterlabs.rakurai.json.element.JsonArray;
@@ -16,8 +17,11 @@ import xyz.e3ndr.consoleutil.ipc.IpcChannel;
 import xyz.e3ndr.consoleutil.ipc.MemoryMappedIpc;
 
 public class RemoteConsoleWindowLauncherInstance {
+    private static final long TIMEOUT = TimeUnit.SECONDS.toMillis(1);
+
     private static ConsoleWindow window;
     private static IpcChannel ipcChannel;
+    private static long lastPing = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(5); // Give it some lee-way
 
     public static void main(String[] args) throws IOException, InterruptedException {
         window = ConsoleUtil.getAttachedConsoleWindow();
@@ -25,12 +29,49 @@ public class RemoteConsoleWindowLauncherInstance {
         String ipcId = args[0];
         ipcChannel = MemoryMappedIpc.startChildIpc(ipcId);
 
+        Thread keepAliveWatchdogThread = new Thread(() -> {
+            while (true) {
+                try {
+                    Thread.sleep(500);
+
+                    if ((System.currentTimeMillis() - lastPing) > TIMEOUT) {
+                        // Other end has died.
+                        System.exit(1);
+                    }
+                } catch (Exception e) {}
+            }
+        });
+
+        keepAliveWatchdogThread.setDaemon(true);
+        keepAliveWatchdogThread.setName("Remote Console Window Instance (ipcId = " + ipcId + ")");
+        keepAliveWatchdogThread.start();
+
+        Thread keepAliveThread = new Thread(() -> {
+            while (true) {
+                try {
+                    Thread.sleep(500);
+
+                    ipcChannel.write("PING");
+                } catch (Exception e) {}
+            }
+        });
+
+        keepAliveThread.setDaemon(true);
+        keepAliveThread.setName("Remote Console Window Instance (ipcId = " + ipcId + ")");
+        keepAliveThread.start();
+
         while (true) {
             try {
-                JsonObject command = Rson.DEFAULT.fromJson(ipcChannel.read(), JsonObject.class);
+                String line = ipcChannel.read();
 
-                if (command.containsKey("method")) {
-                    parseCommand(command);
+                if (line.equals("PING")) {
+                    lastPing = System.currentTimeMillis();
+                } else {
+                    JsonObject command = Rson.DEFAULT.fromJson(line, JsonObject.class);
+
+                    if (command.containsKey("method")) {
+                        parseCommand(command);
+                    }
                 }
             } catch (JsonParseException | IOException | InterruptedException e) {
                 e.printStackTrace();
@@ -40,7 +81,6 @@ public class RemoteConsoleWindowLauncherInstance {
 
     @SneakyThrows
     private static void safeIpcWrite(JsonObject packet) {
-//        System.out.println(packet);
         ipcChannel.write(packet.toString());
     }
 

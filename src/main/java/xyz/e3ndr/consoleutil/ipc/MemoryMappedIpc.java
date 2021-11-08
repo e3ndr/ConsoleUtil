@@ -32,6 +32,9 @@ public class MemoryMappedIpc implements IpcChannel {
 
     private boolean closed = false;
 
+    private boolean busyWriting = false;
+    private boolean busyReading = false;
+
     private FastLogger logger;
 
     private MemoryMappedIpc(String ipcId, boolean isChild) throws IOException {
@@ -95,64 +98,94 @@ public class MemoryMappedIpc implements IpcChannel {
 
     @Override
     public void write(String str) throws IOException, InterruptedException {
-        this.sendBuffer = new StringBuilder(str).append('\0');
+        try {
+            synchronized (this.sendBuffer) {
+                while (this.busyWriting) {
+                    this.sendBuffer.wait();
+                }
+            }
 
-        do {
-            this.waitToWrite();
+            this.busyWriting = true;
 
-            String sub = this.sendBuffer.substring(0, Math.min(SIZE, this.sendBuffer.length()));
-            this.sendBuffer.delete(0, sub.length());
+            this.sendBuffer = new StringBuilder(str).append('\0');
 
-            this.sendCharBuf.position(1);
-            this.sendCharBuf.put(sub);
+            do {
+                this.waitToWrite();
 
-            // Signal that there's data to be read.
-            this.sendCharBuf.put(FLAGS.READY_FLAG, (char) 1);
-        } while (this.sendBuffer.length() > 0);
+                String sub = this.sendBuffer.substring(0, Math.min(SIZE, this.sendBuffer.length()));
+                this.sendBuffer.delete(0, sub.length());
 
-        this.logger.debug("Finished sending string.");
+                this.sendCharBuf.position(1);
+                this.sendCharBuf.put(sub);
+
+                // Signal that there's data to be read.
+                this.sendCharBuf.put(FLAGS.READY_FLAG, (char) 1);
+            } while (this.sendBuffer.length() > 0);
+
+            this.logger.debug("Finished sending string.");
+        } finally {
+            synchronized (this.sendBuffer) {
+                this.busyWriting = false;
+                this.sendBuffer.notify();
+            }
+        }
     }
 
     @Override
     public String read() throws IOException, InterruptedException {
-        boolean isReading = true;
-
-        while (isReading) {
-            // Ready to read more.
-            this.recvCharBuf.put(FLAGS.READY_FLAG, (char) 0);
-
-            this.waitToRead();
-
-            char[] read = new char[SIZE];
-            this.recvCharBuf.position(1);
-            this.recvCharBuf.get(read);
-
-            int contentLen = 0;
-            while (contentLen < SIZE) {
-                if (read[contentLen] == 0) {
-                    isReading = false;
-                    this.logger.debug("Reached the end of the string.");
-                    break;
+        try {
+            synchronized (this.recvCharBuf) {
+                while (this.busyReading) {
+                    this.recvCharBuf.wait();
                 }
-                contentLen++;
             }
 
-            String content = new String(read).substring(0, contentLen);
-            this.recvBuffer.append(content);
+            this.busyReading = true;
+
+            boolean isReading = true;
+
+            while (isReading) {
+                // Ready to read more.
+                this.recvCharBuf.put(FLAGS.READY_FLAG, (char) 0);
+
+                this.waitToRead();
+
+                char[] read = new char[SIZE];
+                this.recvCharBuf.position(1);
+                this.recvCharBuf.get(read);
+
+                int contentLen = 0;
+                while (contentLen < SIZE) {
+                    if (read[contentLen] == 0) {
+                        isReading = false;
+                        this.logger.debug("Reached the end of the string.");
+                        break;
+                    }
+                    contentLen++;
+                }
+
+                String content = new String(read).substring(0, contentLen);
+                this.recvBuffer.append(content);
+            }
+
+            // No longer ready to read.
+            this.recvCharBuf.put(FLAGS.READY_FLAG, (char) 1);
+
+            String result = this.recvBuffer.toString();
+            this.recvBuffer.setLength(0);
+
+            return result;
+        } finally {
+            synchronized (this.recvCharBuf) {
+                this.busyReading = false;
+                this.recvCharBuf.notify();
+            }
         }
-
-        // No longer ready to read.
-        this.recvCharBuf.put(FLAGS.READY_FLAG, (char) 1);
-
-        String result = this.recvBuffer.toString();
-        this.recvBuffer.setLength(0);
-
-        return result;
     }
 
     @Override
     public void close() throws IOException {
-        closed = true;
+        this.closed = true;
         this.sendFileChannel.close();
         this.recvFileChannel.close();
     }
