@@ -362,7 +362,7 @@ public class RemoteConsoleWindow implements ConsoleWindow {
         if (entryFile.exists()) { // If the entry is a file, not a main method.
             ConsoleUtil.startConsoleWindow(
                 String.format(
-                    "\"%s/bin/java\" -DStartedWithConsole=true %s -cp \"%s,%s\" xyz.e3ndr.consoleutil.consolewindow.impl.RemoteConsoleWindowInstance %s",
+                    "\"%s/bin/java\" -DStartedWithConsole=true %s -cp \"%s,%s\" xyz.e3ndr.consoleutil.consolewindow.impl.RemoteConsoleWindowLauncherInstance %s",
                     javaHome,
                     jvmArgs,
                     classpath,
@@ -373,7 +373,7 @@ public class RemoteConsoleWindow implements ConsoleWindow {
         } else {
             ConsoleUtil.startConsoleWindow(
                 String.format(
-                    "\"%s/bin/java\" -DStartedWithConsole=true %s -cp \"%s\" xyz.e3ndr.consoleutil.consolewindow.impl.RemoteConsoleWindowInstance %s",
+                    "\"%s/bin/java\" -DStartedWithConsole=true %s -cp \"%s\" xyz.e3ndr.consoleutil.consolewindow.impl.RemoteConsoleWindowLauncherInstance %s",
                     javaHome,
                     jvmArgs,
                     classpath,
