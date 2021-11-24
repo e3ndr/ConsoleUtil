@@ -37,7 +37,7 @@ public class MemoryMappedIpc implements IpcChannel {
 
     private FastLogger logger;
 
-    private MemoryMappedIpc(String ipcId, boolean isChild) throws IOException {
+    private MemoryMappedIpc(File fileDir, String ipcId, boolean isChild) throws IOException {
         String sendFile;
         String recvFile;
 
@@ -57,10 +57,10 @@ public class MemoryMappedIpc implements IpcChannel {
 
         long bufSizeInBytes = (SIZE + 1) * Character.BYTES;
 
-        this.sendFileChannel = FileChannel.open(new File(System.getProperty("java.io.tmpdir"), sendFile).toPath(), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+        this.sendFileChannel = FileChannel.open(new File(fileDir, sendFile).toPath(), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
         this.sendCharBuf = this.sendFileChannel.map(MapMode.READ_WRITE, 0, bufSizeInBytes).asCharBuffer();
 
-        this.recvFileChannel = FileChannel.open(new File(System.getProperty("java.io.tmpdir"), recvFile).toPath(), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
+        this.recvFileChannel = FileChannel.open(new File(fileDir, recvFile).toPath(), StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.CREATE);
         this.recvCharBuf = this.recvFileChannel.map(MapMode.READ_WRITE, 0, bufSizeInBytes).asCharBuffer();
 
         if (!isChild) {
@@ -191,11 +191,19 @@ public class MemoryMappedIpc implements IpcChannel {
     }
 
     public static MemoryMappedIpc startHostIpc(String ipcId) throws IOException, InterruptedException {
-        return new MemoryMappedIpc(ipcId, false);
+        return new MemoryMappedIpc(new File(System.getProperty("java.io.tmpdir")), ipcId, false);
+    }
+
+    public static MemoryMappedIpc startHostIpc(File directory, String ipcId) throws IOException, InterruptedException {
+        return new MemoryMappedIpc(directory, ipcId, false);
     }
 
     public static MemoryMappedIpc startChildIpc(String ipcId) throws IOException, InterruptedException {
-        return new MemoryMappedIpc(ipcId, true);
+        return new MemoryMappedIpc(new File(System.getProperty("java.io.tmpdir")), ipcId, true);
+    }
+
+    public static MemoryMappedIpc startChildIpc(File directory, String ipcId) throws IOException, InterruptedException {
+        return new MemoryMappedIpc(directory, ipcId, true);
     }
 
 }
