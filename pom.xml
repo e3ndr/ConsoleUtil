@@ -101,6 +101,12 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
+			<groupId>io.github.alexarchambault.windows-ansi</groupId>
+			<artifactId>windows-ansi</artifactId>
+			<version>0.0.3</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.fusesource.jansi</groupId>
 			<artifactId>jansi</artifactId>
 			<version>2.4.0</version>

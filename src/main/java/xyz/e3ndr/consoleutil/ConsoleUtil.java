@@ -4,9 +4,13 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
 import java.util.UUID;
 
+import org.fusesource.jansi.AnsiConsole;
+
+import io.github.alexarchambault.windowsansi.WindowsAnsi;
 import jline.Terminal;
 import jline.TerminalFactory;
 import lombok.Getter;
@@ -16,6 +20,7 @@ import xyz.e3ndr.consoleutil.consolewindow.impl.AttachedConsoleWindow;
 import xyz.e3ndr.consoleutil.consolewindow.impl.RemoteConsoleWindow;
 import xyz.e3ndr.consoleutil.platform.JavaPlatform;
 import xyz.e3ndr.consoleutil.platform.PlatformHandler;
+import xyz.e3ndr.consoleutil.platform.impl.WindowsPlatformHandler;
 import xyz.e3ndr.fastloggingframework.FastLoggingFramework;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
@@ -25,13 +30,31 @@ public class ConsoleUtil {
     private static @Getter @NonNull PlatformHandler handler;
     private static FastLogger logger = new FastLogger();
 
+    public static final PrintStream out;
+
     static {
         if (platform == JavaPlatform.UNKNOWN) {
             logger.warn("Could not detect system type, defaulting to a console size of 40,10");
-            logger.warn("Please report the system type \"%s\" to the developers (Make an issue report).", System.getProperty("os.name"));
+            logger.warn("Please report the system type \"%s\" to the developers (Make an issue report).", System.getProperty("os.name", "Unknown"));
         }
 
+        PrintStream targetOut = AnsiConsole.out;
+
         handler = platform.getHandler(); // Allows programs to manually set a handler.
+
+        if (handler instanceof WindowsPlatformHandler) {
+            // Change to system out.
+            targetOut = AnsiConsole.system_out;
+
+            try {
+                WindowsAnsi.setup();
+            } catch (Exception ignored) {
+                // For some reason windows-ansi will throw on success in an IDE, so we catch.
+                // Even then, we have jansi to fallback on.
+            }
+        }
+
+        out = targetOut;
 
         try {
             jLine.init();
