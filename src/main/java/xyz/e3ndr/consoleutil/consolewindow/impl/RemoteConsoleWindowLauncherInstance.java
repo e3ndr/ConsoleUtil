@@ -6,7 +6,6 @@ import java.util.concurrent.TimeUnit;
 import co.casterlabs.rakurai.json.Rson;
 import co.casterlabs.rakurai.json.element.JsonArray;
 import co.casterlabs.rakurai.json.element.JsonObject;
-import co.casterlabs.rakurai.json.serialization.JsonParseException;
 import lombok.SneakyThrows;
 import xyz.e3ndr.consoleutil.ConsoleUtil;
 import xyz.e3ndr.consoleutil.ansi.ConsoleAttribute;
@@ -73,7 +72,7 @@ public class RemoteConsoleWindowLauncherInstance {
                         parseCommand(command);
                     }
                 }
-            } catch (JsonParseException | IOException | InterruptedException e) {
+            } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
         }
