@@ -2,6 +2,7 @@ package xyz.e3ndr.consoleutil.platform;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import xyz.e3ndr.consoleutil.platform.impl.MacPlatformHandler;
 import xyz.e3ndr.consoleutil.platform.impl.UnixPlatformHandler;
 import xyz.e3ndr.consoleutil.platform.impl.UnknownPlatformHandler;
 import xyz.e3ndr.consoleutil.platform.impl.WindowsPlatformHandler;
@@ -10,6 +11,7 @@ import xyz.e3ndr.consoleutil.platform.impl.WindowsPlatformHandler;
 public enum JavaPlatform {
     WINDOWS(new WindowsPlatformHandler()),
     UNIX(new UnixPlatformHandler()),
+    MAC(new MacPlatformHandler()),
     UNKNOWN(new UnknownPlatformHandler());
 
     private @Getter PlatformHandler handler;
@@ -19,7 +21,9 @@ public enum JavaPlatform {
 
         if (name.contains("windows")) {
             return WINDOWS;
-        } else if (name.contains("mac") || name.contains("linux")) {
+        } else if (name.contains("mac")) {
+            return MAC;
+        } else if (name.contains("linux")) {
             return UNIX;
         } else {
             return UNKNOWN;
