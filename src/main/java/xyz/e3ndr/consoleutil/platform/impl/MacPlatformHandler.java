@@ -28,16 +28,13 @@ public class MacPlatformHandler implements PlatformHandler {
     @Override
     public void startConsoleWindow(String cmdLine) throws IOException, InterruptedException {
     	cmdLine = String.format(
-			"tell application \"Terminal\" to do script \"%s\"",
-"echo Hello world!"
-			//			cmdLine
-//				.replace("\"", "\\\"")
+			"tell application \"Terminal\" to do script \"%s && exit\"",
+				cmdLine
+				.replace("\"", "\\\"")
 				.replace("'", "\\'")
 		);
     	
-    	System.out.println(cmdLine);
-    	
-        new ProcessBuilder("osascript", "-e", cmdLine).inheritIO().start();
+        new ProcessBuilder("osascript", "-e", cmdLine).start();
     }
 
 }
