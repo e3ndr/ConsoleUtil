@@ -21,7 +21,6 @@ import xyz.e3ndr.consoleutil.consolewindow.impl.RemoteConsoleWindow;
 import xyz.e3ndr.consoleutil.platform.JavaPlatform;
 import xyz.e3ndr.consoleutil.platform.PlatformHandler;
 import xyz.e3ndr.consoleutil.platform.impl.WindowsPlatformHandler;
-import xyz.e3ndr.fastloggingframework.FastLoggingFramework;
 import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class ConsoleUtil {
@@ -166,25 +165,24 @@ public class ConsoleUtil {
     /**
      * Resets the current color.
      *
-     * @param  foreground                    whether or not to reset the foreground
-     * @param  background                    whether or not to reset the background
+     * @param  foreground           whether or not to reset the foreground
+     * @param  background           whether or not to reset the background
      * 
-     * @throws IOException                   Signals that an I/O exception has
-     *                                       occurred during the underlying system
-     *                                       call.
-     * @throws InterruptedException          if there is an error while waiting for
-     *                                       a system call.
+     * @throws IOException          Signals that an I/O exception has occurred
+     *                              during the underlying system call.
+     * @throws InterruptedException if there is an error while waiting for a system
+     *                              call.
      */
     public static void resetColor(boolean foreground, boolean background) throws IOException, InterruptedException {
-    	if (foreground) {
-    		out.print("\033[39m");
-    		out.flush();
-    	}
-    	
-    	if (background) {
-    		out.print("\033[49m");
-    		out.flush();
-    	}
+        if (foreground) {
+            out.print("\033[39m");
+            out.flush();
+        }
+
+        if (background) {
+            out.print("\033[49m");
+            out.flush();
+        }
     }
 
     /**
@@ -202,7 +200,7 @@ public class ConsoleUtil {
         String status = System.getProperty("StartedWithConsole", "false");
 
         boolean isNotRunningInConsole = ((System.console() == null) && status.equalsIgnoreCase("false"));
-        
+
         if (isNotRunningInConsole || status.equalsIgnoreCase("force")) {
             String jvmArgs = String.join(" ", ManagementFactory.getRuntimeMXBean().getInputArguments());
             String entry = System.getProperty("sun.java.command"); // Tested, present in OpenJDK and Oracle
@@ -222,12 +220,11 @@ public class ConsoleUtil {
 
             FastLogger.logStatic("Program requested restart under a console window.");
 
-            FastLoggingFramework.close(); // Flush logger
             System.exit(0); // Orphan the child process
         } else {
-        	// Required on MacOS.
-        	// It won't *normally* cause issues on any other system, so it's cool.
-        	clearConsole();
+            // Required on MacOS.
+            // It won't *normally* cause issues on any other system, so it's cool.
+            clearConsole();
         }
     }
 
