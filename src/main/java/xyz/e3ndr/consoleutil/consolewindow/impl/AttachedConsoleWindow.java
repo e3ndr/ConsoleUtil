@@ -27,7 +27,7 @@ public class AttachedConsoleWindow implements ConsoleWindow {
     public AttachedConsoleWindow() throws IOException, InterruptedException {
         ConsoleUtil.clearConsole();
 
-//        ConsoleUtil.getJLine().setEchoEnabled(false);
+        ConsoleUtil.getJLine().setEchoEnabled(false);
     }
 
     private void writeCommand(AnsiCommand command, Object... format) {

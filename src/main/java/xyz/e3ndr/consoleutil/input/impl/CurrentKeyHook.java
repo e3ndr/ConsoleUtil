@@ -3,10 +3,9 @@ package xyz.e3ndr.consoleutil.input.impl;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.jline.utils.NonBlockingInputStream;
-import org.jline.utils.NonBlockingInputStreamImpl;
-
+import jline.internal.NonBlockingInputStream;
 import lombok.SneakyThrows;
+import xyz.e3ndr.consoleutil.ConsoleUtil;
 import xyz.e3ndr.consoleutil.input.InputKey;
 import xyz.e3ndr.consoleutil.input.KeyHook;
 import xyz.e3ndr.consoleutil.input.KeyListener;
@@ -23,24 +22,24 @@ public class CurrentKeyHook extends KeyHook {
 
     @SneakyThrows
     public CurrentKeyHook() {
-        this.in = new NonBlockingInputStreamImpl("KeyHook", System.in);
+        this.in = new NonBlockingInputStream(ConsoleUtil.getJLine().wrapInIfNeeded(System.in), true);
 
         Thread t = new Thread(() -> {
             try {
                 while (true) {
-//                    // Ensures that another thread doesn't change ignoringInterrupt
-//                    // before we can re-enable it below.
-//                    boolean ignoreInterrupt = this.ignoringInterrupt;
-//
-//                    if (ignoreInterrupt) {
-//                        ConsoleUtil.getJLine().disableInterruptCharacter();
-//                    }
+                    // Ensures that another thread doesn't change ignoringInterrupt
+                    // before we can re-enable it below.
+                    boolean ignoreInterrupt = this.ignoringInterrupt;
+
+                    if (ignoreInterrupt) {
+                        ConsoleUtil.getJLine().disableInterruptCharacter();
+                    }
 
                     read();
 
-//                    if (ignoreInterrupt) {
-//                        ConsoleUtil.getJLine().enableInterruptCharacter();
-//                    }
+                    if (ignoreInterrupt) {
+                        ConsoleUtil.getJLine().enableInterruptCharacter();
+                    }
                 }
             } catch (IOException e) {
                 e.printStackTrace();

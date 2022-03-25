@@ -9,10 +9,10 @@ import java.lang.management.ManagementFactory;
 import java.util.UUID;
 
 import org.fusesource.jansi.AnsiConsole;
-import org.jline.terminal.Terminal;
-import org.jline.terminal.TerminalBuilder;
 
 import io.github.alexarchambault.windowsansi.WindowsAnsi;
+import jline.Terminal;
+import jline.TerminalFactory;
 import lombok.Getter;
 import lombok.NonNull;
 import xyz.e3ndr.consoleutil.consolewindow.ConsoleWindow;
@@ -25,7 +25,7 @@ import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class ConsoleUtil {
     private static @Getter final JavaPlatform platform = JavaPlatform.get();
-    private static @Getter Terminal jLine;
+    private static @Getter Terminal jLine = TerminalFactory.get();
     private static @Getter @NonNull PlatformHandler handler;
     private static FastLogger logger = new FastLogger();
 
@@ -37,13 +37,13 @@ public class ConsoleUtil {
             logger.warn("Please report the system type \"%s\" to the developers (Make an issue report).", System.getProperty("os.name", "Unknown"));
         }
 
-        PrintStream targetOut = AnsiConsole.out();
+        PrintStream targetOut = AnsiConsole.out;
 
         handler = platform.getHandler(); // Allows programs to manually set a handler.
 
         if (handler instanceof WindowsPlatformHandler) {
             // Change to system out.
-            targetOut = AnsiConsole.sysOut();
+            targetOut = AnsiConsole.system_out;
 
             try {
                 WindowsAnsi.setup();
@@ -56,7 +56,7 @@ public class ConsoleUtil {
         out = targetOut;
 
         try {
-            jLine = TerminalBuilder.terminal();
+            jLine.init();
         } catch (Exception e) {
             logger.severe("Unable to initialize JLine: %s", e);
         }
