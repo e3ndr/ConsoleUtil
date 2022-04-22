@@ -7,7 +7,6 @@ import java.io.IOException;
 import org.jetbrains.annotations.Nullable;
 
 import lombok.NonNull;
-import xyz.e3ndr.consoleutil.ConsoleUtil;
 import xyz.e3ndr.consoleutil.ansi.ConsoleAttribute;
 import xyz.e3ndr.consoleutil.ansi.ConsoleColor;
 
@@ -229,10 +228,7 @@ public interface ConsoleWindow extends Closeable {
      * 
      * @return this instance, for chaining
      */
-    default ConsoleWindow bell() {
-        ConsoleUtil.bell();
-        return this;
-    }
+    public ConsoleWindow bell();
 
     /**
      * Sets the width and height of the console.
@@ -242,10 +238,7 @@ public interface ConsoleWindow extends Closeable {
      * @throws InterruptedException
      * @throws IOException
      */
-    default ConsoleWindow setSize(int width, int height) throws IOException, InterruptedException {
-        ConsoleUtil.setSize(width, height);
-        return this;
-    }
+    public ConsoleWindow setSize(int width, int height) throws IOException, InterruptedException;
 
     /**
      * Gets the width and height of the console.
@@ -255,9 +248,7 @@ public interface ConsoleWindow extends Closeable {
      * @throws InterruptedException
      * @throws IOException
      */
-    default Dimension getSize() throws IOException, InterruptedException {
-        return ConsoleUtil.getSize();
-    }
+    public Dimension getSize() throws IOException, InterruptedException;
 
     /**
      * Sets the title of the console.
@@ -267,9 +258,29 @@ public interface ConsoleWindow extends Closeable {
      * @throws InterruptedException
      * @throws IOException
      */
-    default ConsoleWindow setTitle(String title) throws IOException, InterruptedException {
-        ConsoleUtil.setTitle(title);
-        return this;
+    public ConsoleWindow setTitle(String title) throws IOException, InterruptedException;
+
+    /**
+     * Resets the current color.
+     *
+     * @param  foreground           whether or not to reset the foreground
+     * @param  background           whether or not to reset the background
+     * 
+     * @throws IOException          Signals that an I/O exception has occurred
+     *                              during the underlying system call.
+     * @throws InterruptedException if there is an error while waiting for a system
+     *                              call.
+     */
+    default void resetColor(boolean foreground, boolean background) throws IOException, InterruptedException {
+        if (foreground) {
+            write("\033[39m");
+        }
+
+        if (background) {
+            write("\033[49m");
+        }
+
+        update();
     }
 
 }

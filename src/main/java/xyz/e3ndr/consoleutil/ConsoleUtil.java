@@ -4,15 +4,10 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
 import java.util.UUID;
 
-import org.fusesource.jansi.AnsiConsole;
-
 import io.github.alexarchambault.windowsansi.WindowsAnsi;
-import jline.Terminal;
-import jline.TerminalFactory;
 import lombok.Getter;
 import lombok.NonNull;
 import xyz.e3ndr.consoleutil.consolewindow.ConsoleWindow;
@@ -21,30 +16,22 @@ import xyz.e3ndr.consoleutil.consolewindow.impl.RemoteConsoleWindow;
 import xyz.e3ndr.consoleutil.platform.JavaPlatform;
 import xyz.e3ndr.consoleutil.platform.PlatformHandler;
 import xyz.e3ndr.consoleutil.platform.impl.WindowsPlatformHandler;
-import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class ConsoleUtil {
     private static @Getter final JavaPlatform platform = JavaPlatform.get();
-    private static @Getter Terminal jLine = TerminalFactory.get();
     private static @Getter @NonNull PlatformHandler handler;
-    private static FastLogger logger = new FastLogger();
 
-    public static final PrintStream out;
+    private static AttachedConsoleWindow window = new AttachedConsoleWindow();
 
     static {
         if (platform == JavaPlatform.UNKNOWN) {
-            logger.warn("Could not detect system type, defaulting to a console size of 40,10");
-            logger.warn("Please report the system type \"%s\" to the developers (Make an issue report).", System.getProperty("os.name", "Unknown"));
+            System.err.println("Could not detect system type, defaulting to a console size of 40,10");
+            System.err.printf("Please report the system type \"%s\" to the developers (Make an issue report).\n", System.getProperty("os.name", "Unknown"));
         }
-
-        PrintStream targetOut = AnsiConsole.out;
 
         handler = platform.getHandler(); // Allows programs to manually set a handler.
 
         if (handler instanceof WindowsPlatformHandler) {
-            // Change to system out.
-            targetOut = AnsiConsole.system_out;
-
             try {
                 WindowsAnsi.setup();
             } catch (Exception ignored) {
@@ -52,16 +39,6 @@ public class ConsoleUtil {
                 // Even then, we have jansi to fallback on.
             }
         }
-
-        out = targetOut;
-
-        try {
-            jLine.init();
-        } catch (Exception e) {
-            logger.severe("Unable to initialize JLine: %s", e);
-        }
-
-        logger.debug("Running under %s on %s", System.getProperty("java.vm.name", "Unknown Runtime"), System.getProperty("os.name", "Unknown Operating System"));
     }
 
     /**
@@ -72,28 +49,27 @@ public class ConsoleUtil {
     }
 
     /**
-     * Gets the size of the console window.
-     *
-     * @return the dimensions
+     * Gets the currently attached console window.
      */
-    public static Dimension getSize() {
-        return new Dimension(jLine.getWidth(), jLine.getHeight());
+    public static ConsoleWindow getAttachedConsoleWindow() {
+        return window;
     }
 
-    /**
-     * Gets the current attached console window.
-     *
-     * @throws IOException                   Signals that an I/O exception has
-     *                                       occurred during the underlying system
-     *                                       call.
-     * @throws InterruptedException          if there is an error while waiting for
-     *                                       a system call.
-     * @throws UnsupportedOperationException if there is no system specific
-     *                                       implementation.
-     */
-    public static ConsoleWindow getAttachedConsoleWindow() throws IOException, InterruptedException {
-        return new AttachedConsoleWindow();
-    }
+//    /**
+//     * Sets whether or not characters should be inserted when typed.
+//     *
+//     * @throws IOException                   Signals that an I/O exception has
+//     *                                       occurred during the underlying system
+//     *                                       call.
+//     * @throws InterruptedException          if there is an error while waiting for
+//     *                                       a system call.
+//     * @throws UnsupportedOperationException if there is no system specific
+//     *                                       implementation.
+//     */
+//    public static void setEchoEnabled(boolean enabled) throws IOException, InterruptedException {
+//        out.print("");
+//        out.flush();
+//    }
 
     /**
      * Opens another console window that you can interact with separately.
@@ -110,6 +86,23 @@ public class ConsoleUtil {
         String ipcId = UUID.randomUUID().toString();
 
         return new RemoteConsoleWindow(ipcId);
+    }
+
+    /**
+     * Gets the size of the console window.
+     *
+     * @return                               the dimensions of the console window.
+     *
+     * @throws IOException                   Signals that an I/O exception has
+     *                                       occurred during the underlying system
+     *                                       call.
+     * @throws InterruptedException          if there is an error while waiting for
+     *                                       a system call.
+     * @throws UnsupportedOperationException if there is no system specific
+     *                                       implementation.
+     */
+    public static Dimension getSize() throws IOException, InterruptedException {
+        return handler.getSize();
     }
 
     /**
@@ -195,7 +188,7 @@ public class ConsoleUtil {
                 handler.startConsoleWindow(String.format("\"%s/bin/java\" -DStartedWithConsole=true %s -cp \"%s\" %s", javaHome, jvmArgs, classpath, entry));
             }
 
-            FastLogger.logStatic("Program requested restart under a console window.");
+            System.out.println("Program requested restart under a console window.");
 
             System.exit(0); // Orphan the child process
         } else {
@@ -206,7 +199,7 @@ public class ConsoleUtil {
     }
 
     /**
-     * Restarts the JVM with a console window.
+     * Opens a console window, running the given command.
      *
      * @throws IOException                   Signals that an I/O exception has
      *                                       occurred during the underlying system

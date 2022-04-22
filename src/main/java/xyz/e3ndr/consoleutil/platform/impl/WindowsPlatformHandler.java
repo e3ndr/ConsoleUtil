@@ -1,7 +1,10 @@
 package xyz.e3ndr.consoleutil.platform.impl;
 
+import java.awt.Dimension;
 import java.io.IOException;
 
+import io.github.alexarchambault.windowsansi.WindowsAnsi;
+import io.github.alexarchambault.windowsansi.WindowsAnsi.Size;
 import lombok.NonNull;
 import xyz.e3ndr.consoleutil.platform.PlatformHandler;
 
@@ -29,6 +32,16 @@ public class WindowsPlatformHandler implements PlatformHandler {
 
     private ProcessBuilder run(String command) {
         return new ProcessBuilder("cmd", "/c", command);
+    }
+
+    @Override
+    public Dimension getSize() throws IOException, InterruptedException {
+        Size s = WindowsAnsi.terminalSize();
+
+        return new Dimension(
+            s.getWidth(),
+            s.getHeight()
+        );
     }
 
 }

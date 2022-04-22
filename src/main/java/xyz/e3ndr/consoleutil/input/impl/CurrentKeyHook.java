@@ -3,14 +3,18 @@ package xyz.e3ndr.consoleutil.input.impl;
 import java.io.IOException;
 import java.util.Iterator;
 
+import jline.Terminal;
+import jline.TerminalFactory;
 import jline.internal.NonBlockingInputStream;
+import lombok.Getter;
 import lombok.SneakyThrows;
-import xyz.e3ndr.consoleutil.ConsoleUtil;
 import xyz.e3ndr.consoleutil.input.InputKey;
 import xyz.e3ndr.consoleutil.input.KeyHook;
 import xyz.e3ndr.consoleutil.input.KeyListener;
 
 public class CurrentKeyHook extends KeyHook {
+    private static @Getter Terminal jLine = TerminalFactory.get();
+
     private static final int CTRL_MASK = 0b11100000;
     private static final int ANSI_ESCAPE = 27; // Also ALT
     private static final int ANSI_START = 91;
@@ -20,9 +24,17 @@ public class CurrentKeyHook extends KeyHook {
 
     private NonBlockingInputStream in;
 
+    static {
+        try {
+            jLine.init();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     @SneakyThrows
     public CurrentKeyHook() {
-        this.in = new NonBlockingInputStream(ConsoleUtil.getJLine().wrapInIfNeeded(System.in), true);
+        this.in = new NonBlockingInputStream(jLine.wrapInIfNeeded(System.in), true);
 
         Thread t = new Thread(() -> {
             try {
@@ -32,13 +44,13 @@ public class CurrentKeyHook extends KeyHook {
                     boolean ignoreInterrupt = this.ignoringInterrupt;
 
                     if (ignoreInterrupt) {
-                        ConsoleUtil.getJLine().disableInterruptCharacter();
+                        jLine.disableInterruptCharacter();
                     }
 
                     read();
 
                     if (ignoreInterrupt) {
-                        ConsoleUtil.getJLine().enableInterruptCharacter();
+                        jLine.enableInterruptCharacter();
                     }
                 }
             } catch (IOException e) {

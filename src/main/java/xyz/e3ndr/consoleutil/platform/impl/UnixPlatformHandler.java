@@ -1,7 +1,9 @@
 package xyz.e3ndr.consoleutil.platform.impl;
 
+import java.awt.Dimension;
 import java.io.IOException;
 
+import co.casterlabs.rakurai.io.IOUtil;
 import lombok.NonNull;
 import xyz.e3ndr.consoleutil.platform.PlatformHandler;
 
@@ -40,6 +42,22 @@ public class UnixPlatformHandler implements PlatformHandler {
 
     public static boolean isGnome() {
         return System.getenv("GNOME_DESKTOP_SESSION_ID") != null;
+    }
+
+    @Override
+    public Dimension getSize() throws IOException, InterruptedException {
+        String[] sizeResult = IOUtil.readString(
+            new ProcessBuilder("stty", "size")
+                .start()
+                .getInputStream()
+        )
+            .trim()
+            .split(" ");
+
+        int height = Integer.parseInt(sizeResult[0]);
+        int width = Integer.parseInt(sizeResult[1]);
+
+        return new Dimension(width, height);
     }
 
 }

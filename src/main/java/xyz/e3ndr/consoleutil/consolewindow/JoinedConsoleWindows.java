@@ -1,5 +1,6 @@
 package xyz.e3ndr.consoleutil.consolewindow;
 
+import java.awt.Dimension;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -192,6 +193,33 @@ public class JoinedConsoleWindows implements ConsoleWindow {
         for (ConsoleWindow w : this.windows) {
             w.close();
         }
+    }
+
+    @Override
+    public ConsoleWindow bell() {
+        this.windows.forEach((w) -> w.bell());
+        return this;
+    }
+
+    @Override
+    public ConsoleWindow setSize(int width, int height) throws IOException, InterruptedException {
+        for (ConsoleWindow w : this.windows) {
+            w.setSize(width, height);
+        }
+        return this;
+    }
+
+    @Override
+    public Dimension getSize() throws IOException, InterruptedException {
+        throw new IOException("The result of this operation would not be accurate and has thus not been implemented.");
+    }
+
+    @Override
+    public ConsoleWindow setTitle(String title) throws IOException, InterruptedException {
+        for (ConsoleWindow w : this.windows) {
+            w.setTitle(title);
+        }
+        return this;
     }
 
 }

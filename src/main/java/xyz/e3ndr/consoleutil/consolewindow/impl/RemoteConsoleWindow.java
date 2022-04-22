@@ -1,5 +1,6 @@
 package xyz.e3ndr.consoleutil.consolewindow.impl;
 
+import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -20,7 +21,6 @@ import xyz.e3ndr.consoleutil.consolewindow.BarStyle;
 import xyz.e3ndr.consoleutil.consolewindow.ConsoleWindow;
 import xyz.e3ndr.consoleutil.ipc.IpcChannel;
 import xyz.e3ndr.consoleutil.ipc.MemoryMappedIpc;
-import xyz.e3ndr.fastloggingframework.logging.LoggingUtil;
 
 public class RemoteConsoleWindow implements ConsoleWindow {
     private static final long TIMEOUT = TimeUnit.SECONDS.toMillis(1);
@@ -185,7 +185,7 @@ public class RemoteConsoleWindow implements ConsoleWindow {
 
     @Override
     public ConsoleWindow write(@Nullable Object format, @Nullable Object... args) {
-        String line = LoggingUtil.parseFormat(format, args);
+        String line = Formatting.parseFormat(format, args);
         this.safeIpcWrite(
             new JsonObject()
                 .put("method", "write(LINE)")
@@ -196,7 +196,7 @@ public class RemoteConsoleWindow implements ConsoleWindow {
 
     @Override
     public ConsoleWindow writeAt(int x, int y, @Nullable Object format, @Nullable Object... args) {
-        String line = LoggingUtil.parseFormat(format, args);
+        String line = Formatting.parseFormat(format, args);
         this.safeIpcWrite(
             new JsonObject()
                 .put("method", "writeAt(int,int,LINE)")
@@ -239,7 +239,7 @@ public class RemoteConsoleWindow implements ConsoleWindow {
 
     @Override
     public ConsoleWindow replaceLine(@Nullable Object format, @Nullable Object... args) {
-        String line = LoggingUtil.parseFormat(format, args);
+        String line = Formatting.parseFormat(format, args);
         this.safeIpcWrite(
             new JsonObject()
                 .put("method", "replaceLine(LINE)")
@@ -250,7 +250,7 @@ public class RemoteConsoleWindow implements ConsoleWindow {
 
     @Override
     public ConsoleWindow replaceLineAt(int y, @Nullable Object format, @Nullable Object... args) {
-        String line = LoggingUtil.parseFormat(format, args);
+        String line = Formatting.parseFormat(format, args);
         this.safeIpcWrite(
             new JsonObject()
                 .put("method", "replaceLineAt(int,LINE)")
@@ -388,6 +388,11 @@ public class RemoteConsoleWindow implements ConsoleWindow {
 
         this.closed = true;
         this.ipcChannel.close();
+    }
+
+    @Override
+    public Dimension getSize() throws IOException, InterruptedException {
+        throw new UnsupportedOperationException();
     }
 
     // Open the other window.

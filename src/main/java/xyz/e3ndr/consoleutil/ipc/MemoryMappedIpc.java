@@ -8,7 +8,6 @@ import java.nio.channels.FileChannel.MapMode;
 import java.nio.file.StandardOpenOption;
 
 import lombok.Getter;
-import xyz.e3ndr.fastloggingframework.logging.FastLogger;
 
 public class MemoryMappedIpc implements IpcChannel {
     private static final long WAIT_TIME = 50;
@@ -35,8 +34,6 @@ public class MemoryMappedIpc implements IpcChannel {
     private boolean busyWriting = false;
     private boolean busyReading = false;
 
-    private FastLogger logger;
-
     private MemoryMappedIpc(File fileDir, String ipcId, boolean isChild) throws IOException {
         String sendFile;
         String recvFile;
@@ -45,15 +42,10 @@ public class MemoryMappedIpc implements IpcChannel {
             // Flip them.
             recvFile = String.format("%s-1.memipc", ipcId);
             sendFile = String.format("%s-2.memipc", ipcId);
-            this.logger = new FastLogger(String.format("Child IPC (%s)", ipcId));
         } else {
             sendFile = String.format("%s-1.memipc", ipcId);
             recvFile = String.format("%s-2.memipc", ipcId);
-            this.logger = new FastLogger(String.format("Host IPC (%s)", ipcId));
         }
-
-        this.logger.debug("My send file: %s", sendFile);
-        this.logger.debug("My recv file: %s", recvFile);
 
         long bufSizeInBytes = (SIZE + 1) * Character.BYTES;
 
@@ -75,25 +67,21 @@ public class MemoryMappedIpc implements IpcChannel {
     private void waitToWrite() throws InterruptedException {
         while (this.sendCharBuf.get(FLAGS.READY_FLAG) != 0) {
             Thread.sleep(WAIT_TIME);
-            this.logger.debug("Not ready to write.");
 
             if (this.closed) {
                 throw new InterruptedException("IPC channel was closed.");
             }
         }
-        this.logger.debug("Ready to write.");
     }
 
     private void waitToRead() throws InterruptedException {
         while (this.recvCharBuf.get(FLAGS.READY_FLAG) != 1) {
             Thread.sleep(WAIT_TIME);
-            this.logger.debug("Not ready to read.");
 
             if (this.closed) {
                 throw new InterruptedException("IPC channel was closed.");
             }
         }
-        this.logger.debug("Ready to read.");
     }
 
     @Override
@@ -121,8 +109,6 @@ public class MemoryMappedIpc implements IpcChannel {
                 // Signal that there's data to be read.
                 this.sendCharBuf.put(FLAGS.READY_FLAG, (char) 1);
             } while (this.sendBuffer.length() > 0);
-
-            this.logger.debug("Finished sending string.");
         } finally {
             synchronized (this.sendBuffer) {
                 this.busyWriting = false;
@@ -158,7 +144,6 @@ public class MemoryMappedIpc implements IpcChannel {
                 while (contentLen < SIZE) {
                     if (read[contentLen] == 0) {
                         isReading = false;
-                        this.logger.debug("Reached the end of the string.");
                         break;
                     }
                     contentLen++;

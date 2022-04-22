@@ -1,7 +1,5 @@
 package xyz.e3ndr.consoleutil.ansi;
 
-import org.fusesource.jansi.Ansi;
-
 import lombok.Getter;
 
 public enum ConsoleAttribute {
@@ -9,20 +7,23 @@ public enum ConsoleAttribute {
     /**
      * Resets all formatting.
      */
-    RESET(Ansi.Attribute.RESET),
-    BOLD(Ansi.Attribute.INTENSITY_BOLD),
-    UNDERLINE(Ansi.Attribute.UNDERLINE),
-    ITALIC(Ansi.Attribute.ITALIC),
-    STRIKETHROUGH(Ansi.Attribute.STRIKETHROUGH_ON),
-    CURSOR_BLINK_FAST(Ansi.Attribute.BLINK_FAST),
-    CURSOR_BLINK_SLOW(Ansi.Attribute.BLINK_SLOW),
-    CURSOR_BLINK_OFF(Ansi.Attribute.BLINK_OFF);
+    RESET("^[22m^[23m^[24m^[25m^[27m^[28m^[9m"),
+
+    // BOLD
+    // DIM/FAINT
+    ITALIC("^[3m"),
+    UNDERLINE(""),
+    // BLINKING
+    // REVERSE
+    // INVISIBLE
+    // STRIKE
+    STRIKETHROUGH("^[9m");
 
     @Getter
     private String ansi;
 
-    private ConsoleAttribute(Ansi.Attribute attribute) {
-        this.ansi = new Ansi().a(attribute).toString();
+    private ConsoleAttribute(String ansi) {
+        this.ansi = ansi.replace("^", "\u001b");
     }
 
 }

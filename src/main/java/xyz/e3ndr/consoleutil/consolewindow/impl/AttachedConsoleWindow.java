@@ -1,5 +1,6 @@
 package xyz.e3ndr.consoleutil.consolewindow.impl;
 
+import java.awt.Dimension;
 import java.io.IOException;
 
 import org.jetbrains.annotations.Nullable;
@@ -15,7 +16,6 @@ import xyz.e3ndr.consoleutil.ansi.ConsoleColor;
 import xyz.e3ndr.consoleutil.consolewindow.BarStyle;
 import xyz.e3ndr.consoleutil.consolewindow.ConsoleWindow;
 import xyz.e3ndr.consoleutil.std.StdStreams;
-import xyz.e3ndr.fastloggingframework.logging.LoggingUtil;
 
 @Accessors(chain = true)
 public class AttachedConsoleWindow implements ConsoleWindow {
@@ -24,10 +24,10 @@ public class AttachedConsoleWindow implements ConsoleWindow {
 
     private @Getter @Setter boolean autoFlushing = true;
 
-    public AttachedConsoleWindow() throws IOException, InterruptedException {
-        ConsoleUtil.clearConsole();
-
-        ConsoleUtil.getJLine().setEchoEnabled(false);
+    public AttachedConsoleWindow() {
+        if (ConsoleUtil.getAttachedConsoleWindow() != null) {
+            throw new IllegalStateException("Already attached.");
+        }
     }
 
     private void writeCommand(AnsiCommand command, Object... format) {
@@ -100,7 +100,7 @@ public class AttachedConsoleWindow implements ConsoleWindow {
 
     @Override
     public ConsoleWindow write(@Nullable Object format, @Nullable Object... args) {
-        String line = LoggingUtil.parseFormat(format, args);
+        String line = Formatting.parseFormat(format, args);
 
         this.writeOut(line);
 
@@ -109,7 +109,7 @@ public class AttachedConsoleWindow implements ConsoleWindow {
 
     @Override
     public ConsoleWindow writeAt(int x, int y, @Nullable Object format, @Nullable Object... args) {
-        String line = LoggingUtil.parseFormat(format, args);
+        String line = Formatting.parseFormat(format, args);
 
         this.saveCursorPosition();
         this.cursorTo(x, y);
@@ -138,7 +138,7 @@ public class AttachedConsoleWindow implements ConsoleWindow {
 
     @Override
     public ConsoleWindow replaceLine(@Nullable Object format, @Nullable Object... args) {
-        String line = LoggingUtil.parseFormat(format, args);
+        String line = Formatting.parseFormat(format, args);
 
         this.writeCommand(AnsiCommand.ERASE_LINE);
         this.writeOut(line);
@@ -148,7 +148,7 @@ public class AttachedConsoleWindow implements ConsoleWindow {
 
     @Override
     public ConsoleWindow replaceLineAt(int y, @Nullable Object format, @Nullable Object... args) {
-        String line = LoggingUtil.parseFormat(format, args);
+        String line = Formatting.parseFormat(format, args);
 
         this.saveCursorPosition();
         this.cursorTo(0, y);
@@ -217,5 +217,28 @@ public class AttachedConsoleWindow implements ConsoleWindow {
 
     @Override
     public void close() throws IOException {}
+
+    @Override
+    public ConsoleWindow bell() {
+        ConsoleUtil.bell();
+        return this;
+    }
+
+    @Override
+    public ConsoleWindow setSize(int width, int height) throws IOException, InterruptedException {
+        ConsoleUtil.setSize(width, height);
+        return this;
+    }
+
+    @Override
+    public Dimension getSize() throws IOException, InterruptedException {
+        return ConsoleUtil.getSize();
+    }
+
+    @Override
+    public ConsoleWindow setTitle(String title) throws IOException, InterruptedException {
+        ConsoleUtil.setTitle(title);
+        return this;
+    }
 
 }
