@@ -163,29 +163,6 @@ public class ConsoleUtil {
     }
 
     /**
-     * Resets the current color.
-     *
-     * @param  foreground           whether or not to reset the foreground
-     * @param  background           whether or not to reset the background
-     * 
-     * @throws IOException          Signals that an I/O exception has occurred
-     *                              during the underlying system call.
-     * @throws InterruptedException if there is an error while waiting for a system
-     *                              call.
-     */
-    public static void resetColor(boolean foreground, boolean background) throws IOException, InterruptedException {
-        if (foreground) {
-            out.print("\033[39m");
-            out.flush();
-        }
-
-        if (background) {
-            out.print("\033[49m");
-            out.flush();
-        }
-    }
-
-    /**
      * Restarts the JVM with a console window.
      *
      * @throws IOException                   Signals that an I/O exception has
@@ -203,7 +180,7 @@ public class ConsoleUtil {
 
         if (isNotRunningInConsole || status.equalsIgnoreCase("force")) {
             String jvmArgs = String.join(" ", ManagementFactory.getRuntimeMXBean().getInputArguments());
-            String entry = System.getProperty("sun.java.command"); // Tested, present in OpenJDK and Oracle
+            String entry = System.getProperty("sun.java.command", ""); // Tested, present in OpenJDK and Oracle
             String classpath = System.getProperty("java.class.path");
             String javaHome = System.getProperty("java.home");
 

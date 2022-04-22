@@ -140,7 +140,7 @@ public class RemoteConsoleWindowLauncherInstance {
 
             case "write(LINE)": {
                 window.write(
-                    command.getString("LINE")
+                    command.getString("line")
                 );
                 return;
             }
