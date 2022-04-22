@@ -29,10 +29,7 @@ public enum ConsoleColor {
 
     GRAY          (7),
     WHITE         (GRAY),
-    
-    /**
-     * @ImplNote This is terminal specific.
-     */
+
     TERMINAL_DEFAULT       (9),
     TERMINAL_DEFAULT_LIGHT (TERMINAL_DEFAULT),
 
