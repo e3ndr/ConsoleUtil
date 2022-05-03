@@ -283,4 +283,8 @@ public interface ConsoleWindow extends Closeable {
         update();
     }
 
+    public static String sanitize(String string) {
+        return string.replace("\u001b", "^");
+    }
+
 }
