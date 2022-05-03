@@ -316,10 +316,10 @@ public class RemoteConsoleWindow implements ConsoleWindow {
     }
 
     @Override
-    public ConsoleWindow update() {
+    public ConsoleWindow flush() {
         this.safeIpcWrite(
             new JsonObject()
-                .put("method", "update()")
+                .put("method", "flush()")
         );
         return this;
     }

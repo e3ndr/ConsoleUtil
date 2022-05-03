@@ -199,7 +199,7 @@ public interface ConsoleWindow extends Closeable {
      *
      * @return this instance, for chaining
      */
-    public ConsoleWindow update();
+    public ConsoleWindow flush();
 
     /**
      * Clears the buffer.

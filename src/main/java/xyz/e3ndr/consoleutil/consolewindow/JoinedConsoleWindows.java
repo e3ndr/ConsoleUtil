@@ -159,8 +159,8 @@ public class JoinedConsoleWindows implements ConsoleWindow {
     }
 
     @Override
-    public ConsoleWindow update() {
-        this.windows.forEach((w) -> w.update());
+    public ConsoleWindow flush() {
+        this.windows.forEach((w) -> w.flush());
         return this;
     }
 

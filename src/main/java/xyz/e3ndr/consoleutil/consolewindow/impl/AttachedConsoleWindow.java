@@ -200,7 +200,7 @@ public class AttachedConsoleWindow implements ConsoleWindow {
     }
 
     @Override
-    public ConsoleWindow update() {
+    public ConsoleWindow flush() {
         this.std.out.print(this.buffer);
         this.std.out.flush();
         this.buffer.setLength(0);

@@ -230,8 +230,8 @@ public class RemoteConsoleWindowLauncherInstance {
                 return;
             }
 
-            case "update()": {
-                window.update();
+            case "flush()": {
+                window.flush();
                 return;
             }
 
