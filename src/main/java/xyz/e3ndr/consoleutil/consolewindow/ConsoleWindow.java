@@ -273,11 +273,11 @@ public interface ConsoleWindow extends Closeable {
      */
     default void resetColor(boolean foreground, boolean background) throws IOException, InterruptedException {
         if (foreground) {
-            write("\033[39m");
+            write("\u001b[39m");
         }
 
         if (background) {
-            write("\033[49m");
+            write("\u001b[49m");
         }
 
         update();

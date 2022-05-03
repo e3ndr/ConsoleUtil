@@ -11,19 +11,19 @@ public class UnixPlatformHandler implements PlatformHandler {
 
     @Override
     public void clearConsole() throws IOException, InterruptedException {
-        System.out.print("\033[H\033[2J");
+        System.out.print("\u001b[H\u001b[2J");
         System.out.flush();
     }
 
     @Override
     public void setTitle(@NonNull String title) throws IOException, InterruptedException {
-        System.out.printf("\033]0;%s\007", title);
+        System.out.printf("\u001b]0;%s\007", title);
         System.out.flush();
     }
 
     @Override
     public void setSize(int width, int height) throws IOException, InterruptedException {
-        System.out.printf("\033[8;%d;%d6", width, height);
+        System.out.printf("\u001b[8;%d;%d6", width, height);
         System.out.flush();
     }
 
