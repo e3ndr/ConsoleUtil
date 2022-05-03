@@ -4,20 +4,23 @@ import lombok.Getter;
 
 public enum ConsoleAttribute {
 
+    // @formatter:off
     /**
      * Resets all formatting.
      */
-    RESET("^[22m^[23m^[24m^[25m^[27m^[28m^[9m"),
+    RESET("^[0m"),
 
-    // BOLD
-    // DIM/FAINT
-    ITALIC("^[3m"),
-    UNDERLINE(""),
-    // BLINKING
-    // REVERSE
-    // INVISIBLE
-    // STRIKE
-    STRIKETHROUGH("^[9m");
+    BOLD("^[1m"), BOLD_OFF("^[22m"),
+    DIM("^[2m"), DIM_OFF("^[22m"),
+    ITALIC("^[3m"), ITALIC_OFF("^[23m"),
+    UNDERLINE("^[4m"), UNDERLINE_OFF("^[24m"),
+    BLINKING("^[5m"), BLINKING_OFF("^[25m"),
+    REVERSE("^[7m"), REVERSE_OFF("^[27m"),
+    INVISIBLE("^[8m"), INVISIBLE_OFF("^[28m"),
+    STRIKETHROUGH("^[9m"), STRIKETHROUGH_OFF("^[29m"),
+    
+    ; 
+    // @formatter:on
 
     @Getter
     private String ansi;
