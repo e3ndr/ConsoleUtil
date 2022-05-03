@@ -29,4 +29,9 @@ public enum ConsoleAttribute {
         this.ansi = ansi.replace("^", "\u001b");
     }
 
+    @Override
+    public String toString() {
+        return this.ansi;
+    }
+
 }

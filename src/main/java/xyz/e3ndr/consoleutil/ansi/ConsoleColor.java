@@ -68,6 +68,11 @@ public enum ConsoleColor {
         }
     }
 
+    @Override
+    public String toString() {
+        return this.foreground;
+    }
+
     /**
      * Color map:
      * https://user-images.githubusercontent.com/995050/47952855-ecb12480-df75-11e8-89d4-ac26c50e80b9.png
