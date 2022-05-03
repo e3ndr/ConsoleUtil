@@ -29,6 +29,10 @@ public enum ConsoleAttribute {
         this.ansi = ansi.replace("^", "\u001b");
     }
 
+    public boolean isOff() {
+        return this.name().contains("OFF");
+    }
+
     @Override
     public String toString() {
         return this.ansi;
