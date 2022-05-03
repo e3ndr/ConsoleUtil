@@ -202,7 +202,7 @@ public interface ConsoleWindow extends Closeable {
     public ConsoleWindow flush();
 
     /**
-     * Clears the buffer.
+     * Clears the buffer, this only is useful if auto flushing is disabled.
      *
      * @return this instance, for chaining
      */
@@ -271,18 +271,95 @@ public interface ConsoleWindow extends Closeable {
      * @throws InterruptedException if there is an error while waiting for a system
      *                              call.
      */
-    default void resetColor(boolean foreground, boolean background) throws IOException, InterruptedException {
+    default ConsoleWindow resetColor(boolean foreground, boolean background) throws IOException, InterruptedException {
         if (foreground) {
-            write("\u001b[39m");
+            this.write("\u001b[39m");
         }
 
         if (background) {
-            write("\u001b[49m");
+            this.write("\u001b[49m");
         }
 
-        update();
+        this.flush();
+
+        return this;
     }
 
+    /**
+     * Sets the foreground color.
+     * 
+     * @param  value                the 255 byte value
+     *
+     * @return                      this instance, for chaining
+     * 
+     * @throws IOException          Signals that an I/O exception has occurred
+     *                              during the underlying system call.
+     * @throws InterruptedException if there is an error while waiting for a system
+     *                              call.
+     */
+    default ConsoleWindow set8BitColor(int value) {
+        this.write(ConsoleColor.get8BitColor(value));
+        return this;
+    }
+
+    /**
+     * Sets the background color.
+     * 
+     * @param  value                the 256 byte value
+     *
+     * @return                      this instance, for chaining
+     * 
+     * @throws IOException          Signals that an I/O exception has occurred
+     *                              during the underlying system call.
+     * @throws InterruptedException if there is an error while waiting for a system
+     *                              call.
+     */
+    default ConsoleWindow set8BitBackgroundColor(int value) {
+        this.write(ConsoleColor.get8BitBackgroundColor(value));
+        return this;
+    }
+
+    /**
+     * Sets the foreground color.
+     * 
+     * @param  red                  the red channel
+     * @param  green                the green channel
+     * @param  blue                 the blue channel
+     *
+     * @return                      this instance, for chaining
+     * 
+     * @throws IOException          Signals that an I/O exception has occurred
+     *                              during the underlying system call.
+     * @throws InterruptedException if there is an error while waiting for a system
+     *                              call.
+     */
+    default ConsoleWindow set24BitColor(int red, int green, int blue) {
+        this.write(ConsoleColor.get24BitColor(red, green, blue));
+        return this;
+    }
+
+    /**
+     * Sets the background color.
+     * 
+     * @param  red                  the red channel
+     * @param  green                the green channel
+     * @param  blue                 the blue channel
+     *
+     * @return                      this instance, for chaining
+     * 
+     * @throws IOException          Signals that an I/O exception has occurred
+     *                              during the underlying system call.
+     * @throws InterruptedException if there is an error while waiting for a system
+     *                              call.
+     */
+    default ConsoleWindow set24BitBackgroundColor(int red, int green, int blue) {
+        this.write(ConsoleColor.get24BitBackgroundColor(red, green, blue));
+        return this;
+    }
+
+    /**
+     * Completely sanitizes the input string.
+     */
     public static String sanitize(String string) {
         return string.replace("\u001b", "^");
     }
