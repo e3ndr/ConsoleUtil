@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.util.UUID;
 
-import io.github.alexarchambault.windowsansi.WindowsAnsi;
 import lombok.Getter;
 import lombok.NonNull;
 import xyz.e3ndr.consoleutil.consolewindow.ConsoleWindow;
@@ -33,10 +32,9 @@ public class ConsoleUtil {
 
         if (handler instanceof WindowsPlatformHandler) {
             try {
-                WindowsAnsi.setup();
-            } catch (Exception ignored) {
-                // For some reason windows-ansi will throw on success in an IDE, so we catch.
-                // Even then, we have jansi to fallback on.
+                WindowsPlatformHandler.setup();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }

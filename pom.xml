@@ -96,18 +96,12 @@
 		</dependency>
 
 		<dependency>
-			<groupId>io.github.alexarchambault.windows-ansi</groupId>
-			<artifactId>windows-ansi</artifactId>
-			<version>0.0.3</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
 			<groupId>jline</groupId>
 			<artifactId>jline</artifactId>
 			<version>2.14.6</version>
 			<scope>provided</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.github.casterlabs.rakurai</groupId>
 			<artifactId>Json</artifactId>
