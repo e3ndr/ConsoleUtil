@@ -15,7 +15,7 @@ public class WindowsPlatformHandler implements PlatformHandler {
 
     static {
         try {
-            String script = IOUtil.readString(WindowsPlatformHandler.class.getResourceAsStream("/windows_setup.ps1"));
+            String script = IOUtil.readString(WindowsPlatformHandler.class.getResourceAsStream("/consoleutil/windows/setup.ps1"));
             script = String.format("& {\n%s\n}", script);
 
             setupScriptEncoded = encodeScript(script);
@@ -24,10 +24,10 @@ public class WindowsPlatformHandler implements PlatformHandler {
         }
 
         try {
-            String script = IOUtil.readString(WindowsPlatformHandler.class.getResourceAsStream("/windows_size.ps1"));
+            String script = IOUtil.readString(WindowsPlatformHandler.class.getResourceAsStream("/consoleutil/windows/size.ps1"));
             script = String.format("& {\n%s\n}", script);
 
-            setupScriptEncoded = encodeScript(script);
+            sizeScriptEncoded = encodeScript(script);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -86,12 +86,12 @@ public class WindowsPlatformHandler implements PlatformHandler {
         return new Dimension(width, height);
     }
 
-    public static String encodeScript(String script) {
+    public static String encodeScript(@NonNull String script) {
         return Base64.getEncoder()
             .encodeToString(script.getBytes(StandardCharsets.UTF_16LE));
     }
 
-    public static Process powershell(String encodedScript) throws IOException {
+    public static Process powershell(@NonNull String encodedScript) throws IOException {
         return new ProcessBuilder()
             .command(
                 "powershell.exe",
