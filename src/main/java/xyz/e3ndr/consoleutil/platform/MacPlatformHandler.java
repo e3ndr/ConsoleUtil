@@ -1,4 +1,4 @@
-package xyz.e3ndr.consoleutil.platform.impl;
+package xyz.e3ndr.consoleutil.platform;
 
 import java.io.IOException;
 

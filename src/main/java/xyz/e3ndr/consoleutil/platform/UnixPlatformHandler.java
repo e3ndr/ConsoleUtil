@@ -1,11 +1,10 @@
-package xyz.e3ndr.consoleutil.platform.impl;
+package xyz.e3ndr.consoleutil.platform;
 
 import java.awt.Dimension;
 import java.io.IOException;
 
 import co.casterlabs.rakurai.io.IOUtil;
 import lombok.NonNull;
-import xyz.e3ndr.consoleutil.platform.PlatformHandler;
 
 public class UnixPlatformHandler implements PlatformHandler {
 

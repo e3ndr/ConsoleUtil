@@ -1,4 +1,4 @@
-package xyz.e3ndr.consoleutil.platform.impl;
+package xyz.e3ndr.consoleutil.platform;
 
 import java.awt.Dimension;
 import java.io.IOException;
@@ -8,21 +8,39 @@ import java.util.Base64;
 
 import co.casterlabs.rakurai.io.IOUtil;
 import lombok.NonNull;
-import xyz.e3ndr.consoleutil.platform.PlatformHandler;
 
 public class WindowsPlatformHandler implements PlatformHandler {
+    private static String setupScriptEncoded;
     private static String sizeScriptEncoded;
 
     static {
         try {
-            String script = IOUtil.readString(WindowsPlatformHandler.class.getResourceAsStream("/windows_size.ps1"));
+            String script = IOUtil.readString(WindowsPlatformHandler.class.getResourceAsStream("/windows_setup.ps1"));
             script = String.format("& {\n%s\n}", script);
 
-            sizeScriptEncoded = Base64.getEncoder()
-                .encodeToString(script.getBytes(StandardCharsets.UTF_16LE));
+            setupScriptEncoded = encodeScript(script);
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        try {
+            String script = IOUtil.readString(WindowsPlatformHandler.class.getResourceAsStream("/windows_size.ps1"));
+            script = String.format("& {\n%s\n}", script);
+
+            setupScriptEncoded = encodeScript(script);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void setup() throws IOException, InterruptedException {
+        Process process = powershell(setupScriptEncoded);
+
+        /*int ret = */process.waitFor();
+//        if (ret != 0) {
+//            throw new IOException(String.format("Error running windows setup script (code: %d)", ret));
+//        }
     }
 
     @Override
@@ -51,18 +69,7 @@ public class WindowsPlatformHandler implements PlatformHandler {
 
     @Override
     public Dimension getSize() throws IOException, InterruptedException {
-        Process process = new ProcessBuilder()
-            .command(
-                "powershell.exe",
-                "-NoProfile",
-                "-NonInteractive",
-                "-EncodedCommand", sizeScriptEncoded
-            )
-            .inheritIO()
-            .redirectError(Redirect.PIPE)
-            .redirectOutput(Redirect.PIPE)
-            .start();
-
+        Process process = powershell(sizeScriptEncoded);
         process.waitFor();
 
         String result = IOUtil.readString(process.getInputStream()).trim();
@@ -79,14 +86,13 @@ public class WindowsPlatformHandler implements PlatformHandler {
         return new Dimension(width, height);
     }
 
-    public static void setup() throws IOException, InterruptedException {
-        String script = IOUtil.readString(WindowsPlatformHandler.class.getResourceAsStream("/windows_setup.ps1"));
-        script = String.format("& {\n%s\n}", script);
-
-        String encodedScript = Base64.getEncoder()
+    public static String encodeScript(String script) {
+        return Base64.getEncoder()
             .encodeToString(script.getBytes(StandardCharsets.UTF_16LE));
+    }
 
-        ProcessBuilder builder = new ProcessBuilder()
+    public static Process powershell(String encodedScript) throws IOException {
+        return new ProcessBuilder()
             .command(
                 "powershell.exe",
                 "-NoProfile",
@@ -94,12 +100,9 @@ public class WindowsPlatformHandler implements PlatformHandler {
                 "-EncodedCommand", encodedScript
             )
             .inheritIO()
-            .redirectError(Redirect.PIPE);
-
-        /*int ret = */builder.start().waitFor();
-//        if (ret != 0) {
-//            throw new IOException(String.format("Error running windows setup script (code: %d)", ret));
-//        }
+            .redirectError(Redirect.PIPE)
+            .redirectOutput(Redirect.PIPE)
+            .start();
     }
 
 }

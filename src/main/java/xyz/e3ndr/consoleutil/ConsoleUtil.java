@@ -12,30 +12,23 @@ import lombok.NonNull;
 import xyz.e3ndr.consoleutil.consolewindow.ConsoleWindow;
 import xyz.e3ndr.consoleutil.consolewindow.impl.AttachedConsoleWindow;
 import xyz.e3ndr.consoleutil.consolewindow.impl.RemoteConsoleWindow;
-import xyz.e3ndr.consoleutil.platform.JavaPlatform;
 import xyz.e3ndr.consoleutil.platform.PlatformHandler;
-import xyz.e3ndr.consoleutil.platform.impl.WindowsPlatformHandler;
+import xyz.e3ndr.consoleutil.platform.UnknownPlatformHandler;
 
 public class ConsoleUtil {
-    private static @Getter final JavaPlatform platform = JavaPlatform.get();
-    private static @Getter @NonNull PlatformHandler handler;
-
+    private static final @Getter @NonNull PlatformHandler handler = PlatformHandler.get();
     private static AttachedConsoleWindow window = new AttachedConsoleWindow();
 
     static {
-        if (platform == JavaPlatform.UNKNOWN) {
-            System.err.println("Could not detect system type, defaulting to a console size of 40,10");
+        if (handler instanceof UnknownPlatformHandler) {
+            System.err.println("Could not detect system type.");
             System.err.printf("Please report the system type \"%s\" to the developers (Make an issue report).\n", System.getProperty("os.name", "Unknown"));
         }
 
-        handler = platform.getHandler(); // Allows programs to manually set a handler.
-
-        if (handler instanceof WindowsPlatformHandler) {
-            try {
-                WindowsPlatformHandler.setup();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        try {
+            handler.setup();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -209,16 +202,6 @@ public class ConsoleUtil {
      */
     public static void startConsoleWindow(String cmdLine) throws IOException, InterruptedException {
         handler.startConsoleWindow(cmdLine);
-    }
-
-    /**
-     * Sets the platform handler.
-     *
-     * @param newHandler the new handler
-     */
-    @Deprecated
-    public static void setHandler(@NonNull PlatformHandler newHandler) {
-        handler = newHandler;
     }
 
 }
