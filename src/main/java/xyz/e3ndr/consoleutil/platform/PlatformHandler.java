@@ -15,7 +15,7 @@ public interface PlatformHandler {
                 return new WindowsPlatformHandler();
 
             case UNIX:
-                if (Platform.osDistribution == OSDistribution.MACOSX) {
+                if (Platform.osDistribution == OSDistribution.MACOS) {
                     return new MacPlatformHandler();
                 } else {
                     return new UnixPlatformHandler();
