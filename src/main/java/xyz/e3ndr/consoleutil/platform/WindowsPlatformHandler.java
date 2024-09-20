@@ -3,10 +3,11 @@ package xyz.e3ndr.consoleutil.platform;
 import java.awt.Dimension;
 import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-import co.casterlabs.rakurai.io.IOUtil;
+import co.casterlabs.commons.io.streams.StreamUtil;
 import lombok.NonNull;
 
 public class WindowsPlatformHandler implements PlatformHandler {
@@ -15,7 +16,7 @@ public class WindowsPlatformHandler implements PlatformHandler {
 
     static {
         try {
-            String script = IOUtil.readString(WindowsPlatformHandler.class.getResourceAsStream("/consoleutil/windows/setup.ps1"));
+            String script = StreamUtil.toString(WindowsPlatformHandler.class.getResourceAsStream("/consoleutil/windows/setup.ps1"), Charset.defaultCharset());
             script = String.format("& {\n%s\n}", script);
 
             setupScriptEncoded = encodeScript(script);
@@ -24,7 +25,7 @@ public class WindowsPlatformHandler implements PlatformHandler {
         }
 
         try {
-            String script = IOUtil.readString(WindowsPlatformHandler.class.getResourceAsStream("/consoleutil/windows/size.ps1"));
+            String script = StreamUtil.toString(WindowsPlatformHandler.class.getResourceAsStream("/consoleutil/windows/size.ps1"), Charset.defaultCharset());
             script = String.format("& {\n%s\n}", script);
 
             sizeScriptEncoded = encodeScript(script);
@@ -72,7 +73,7 @@ public class WindowsPlatformHandler implements PlatformHandler {
         Process process = powershell(sizeScriptEncoded);
         process.waitFor();
 
-        String result = IOUtil.readString(process.getInputStream()).trim();
+        String result = StreamUtil.toString(process.getInputStream(), Charset.defaultCharset()).trim();
         String[] sizes = result.split(",");
 
         int width = 0;

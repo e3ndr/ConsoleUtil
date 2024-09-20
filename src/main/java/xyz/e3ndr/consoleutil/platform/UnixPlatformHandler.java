@@ -2,8 +2,9 @@ package xyz.e3ndr.consoleutil.platform;
 
 import java.awt.Dimension;
 import java.io.IOException;
+import java.nio.charset.Charset;
 
-import co.casterlabs.rakurai.io.IOUtil;
+import co.casterlabs.commons.io.streams.StreamUtil;
 import lombok.NonNull;
 
 public class UnixPlatformHandler implements PlatformHandler {
@@ -45,10 +46,11 @@ public class UnixPlatformHandler implements PlatformHandler {
 
     @Override
     public Dimension getSize() throws IOException, InterruptedException {
-        String[] sizeResult = IOUtil.readString(
+        String[] sizeResult = StreamUtil.toString(
             new ProcessBuilder("stty", "size")
                 .start()
-                .getInputStream()
+                .getInputStream(),
+            Charset.defaultCharset()
         )
             .trim()
             .split(" ");
